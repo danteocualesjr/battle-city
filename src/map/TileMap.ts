@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { COLORS, GRID_SIZE, TILE_SIZE } from '../config/constants';
+import { GRID_SIZE, PLAYFIELD_OFFSET_X, PLAYFIELD_OFFSET_Y, TILE_SIZE } from '../config/constants';
 import {
   type BrickQuadrants,
   emptyBrick,
@@ -17,13 +17,16 @@ interface CellState {
 
 export class TileMap {
   private cells: CellState[][] = [];
-  private graphics: Phaser.GameObjects.Graphics;
-  private forestGraphics: Phaser.GameObjects.Graphics;
+  private bgLayer: Phaser.GameObjects.Container;
+  private fgLayer: Phaser.GameObjects.Container;
+  private cellNodes: Phaser.GameObjects.GameObject[][] = [];
   baseDestroyed = false;
+  private scene: Phaser.Scene;
 
   constructor(scene: Phaser.Scene) {
-    this.graphics = scene.add.graphics().setDepth(1);
-    this.forestGraphics = scene.add.graphics().setDepth(5);
+    this.scene = scene;
+    this.bgLayer = scene.add.container(PLAYFIELD_OFFSET_X, PLAYFIELD_OFFSET_Y).setDepth(1);
+    this.fgLayer = scene.add.container(PLAYFIELD_OFFSET_X, PLAYFIELD_OFFSET_Y).setDepth(5);
   }
 
   loadFromStrings(rows: string[]): void {
@@ -43,8 +46,9 @@ export class TileMap {
   }
 
   redraw(): void {
-    this.graphics.clear();
-    this.forestGraphics.clear();
+    this.bgLayer.removeAll(true);
+    this.fgLayer.removeAll(true);
+    this.cellNodes = Array.from({ length: GRID_SIZE }, () => []);
 
     for (let row = 0; row < GRID_SIZE; row++) {
       for (let col = 0; col < GRID_SIZE; col++) {
@@ -54,68 +58,85 @@ export class TileMap {
 
         switch (cell.type) {
           case TileType.Brick:
-            this.drawBrickCell(x, y, cell.brick);
+            this.placeBrick(x, y, cell.brick, col, row);
             break;
-          case TileType.Steel:
-            this.drawSteel(x, y);
+          case TileType.Steel: {
+            const img = this.scene.add.image(x, y, 'steel').setOrigin(0);
+            this.bgLayer.add(img);
+            this.cellNodes[row][col] = img;
             break;
-          case TileType.Water:
-            this.graphics.fillStyle(COLORS.water, 1);
-            this.graphics.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+          }
+          case TileType.Water: {
+            const img = this.scene.add.image(x, y, 'water').setOrigin(0);
+            this.bgLayer.add(img);
+            this.cellNodes[row][col] = img;
             break;
-          case TileType.Ice:
-            this.graphics.fillStyle(COLORS.ice, 1);
-            this.graphics.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+          }
+          case TileType.Ice: {
+            const img = this.scene.add.image(x, y, 'ice').setOrigin(0);
+            this.bgLayer.add(img);
+            this.cellNodes[row][col] = img;
             break;
-          case TileType.Base:
+          }
+          case TileType.Base: {
             if (!this.baseDestroyed) {
-              this.graphics.fillStyle(COLORS.base, 1);
-              this.graphics.fillRect(x + 2, y + 2, TILE_SIZE - 4, TILE_SIZE - 4);
-              this.graphics.fillStyle(0xffffff, 1);
-              this.graphics.fillTriangle(x + 8, y + 4, x + 4, y + 12, x + 12, y + 12);
+              const img = this.scene.add.image(x, y, 'base').setOrigin(0);
+              this.bgLayer.add(img);
+              this.cellNodes[row][col] = img;
+            } else {
+              const img = this.scene.add.image(x, y, 'base-destroyed').setOrigin(0);
+              this.bgLayer.add(img);
+              this.cellNodes[row][col] = img;
             }
             break;
-          case TileType.Forest:
-            this.forestGraphics.fillStyle(COLORS.forest, 0.85);
-            this.forestGraphics.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+          }
+          case TileType.Forest: {
+            const img = this.scene.add.image(x, y, 'forest').setOrigin(0);
+            this.fgLayer.add(img);
+            this.cellNodes[row][col] = img;
             break;
+          }
         }
       }
     }
   }
 
-  private drawBrickCell(x: number, y: number, b: BrickQuadrants): void {
+  private placeBrick(x: number, y: number, b: BrickQuadrants, col: number, row: number): void {
     const half = TILE_SIZE / 2;
-    const drawQ = (qx: number, qy: number, on: boolean) => {
-      if (!on) return;
-      this.graphics.fillStyle(COLORS.brick, 1);
-      this.graphics.fillRect(x + qx, y + qy, half, half);
-      this.graphics.lineStyle(1, COLORS.brickDark, 1);
-      this.graphics.strokeRect(x + qx, y + qy, half, half);
-    };
-    drawQ(0, 0, b.tl);
-    drawQ(half, 0, b.tr);
-    drawQ(0, half, b.bl);
-    drawQ(half, half, b.br);
-  }
-
-  private drawSteel(x: number, y: number): void {
-    this.graphics.fillStyle(COLORS.steel, 1);
-    this.graphics.fillRect(x, y, TILE_SIZE, TILE_SIZE);
-    this.graphics.lineStyle(1, COLORS.steelDark, 1);
-    this.graphics.lineBetween(x + 4, y + 4, x + 12, y + 12);
-    this.graphics.lineBetween(x + 12, y + 4, x + 4, y + 12);
+    const container = this.scene.add.container(x, y);
+    if (b.tl) container.add(this.scene.add.image(0, 0, 'brick-q').setOrigin(0));
+    if (b.tr) container.add(this.scene.add.image(half, 0, 'brick-q').setOrigin(0));
+    if (b.bl) container.add(this.scene.add.image(0, half, 'brick-q').setOrigin(0));
+    if (b.br) container.add(this.scene.add.image(half, half, 'brick-q').setOrigin(0));
+    this.bgLayer.add(container);
+    this.cellNodes[row][col] = container;
   }
 
   fortifyBase(): void {
-    for (let row = GRID_SIZE - 3; row < GRID_SIZE; row++) {
-      for (let col = 4; col <= 8; col++) {
-        const cell = this.cells[row]?.[col];
-        if (cell && (cell.type === TileType.Brick || cell.type === TileType.Steel)) {
-          cell.type = TileType.Steel;
-          cell.brick = emptyBrick();
-          cell.steelHits = 0;
-          cell.fortified = true;
+    const targets = [
+      { col: 5, row: 12 }, { col: 6, row: 12 }, { col: 7, row: 12 },
+      { col: 5, row: 11 }, { col: 7, row: 11 },
+    ];
+    for (const { col, row } of targets) {
+      const cell = this.cells[row]?.[col];
+      if (cell && (cell.type === TileType.Brick || cell.type === TileType.Empty || cell.type === TileType.Steel)) {
+        cell.type = TileType.Steel;
+        cell.brick = emptyBrick();
+        cell.steelHits = 0;
+        cell.fortified = true;
+      }
+    }
+    this.redraw();
+  }
+
+  unfortifyBase(): void {
+    for (let row = 0; row < GRID_SIZE; row++) {
+      for (let col = 0; col < GRID_SIZE; col++) {
+        const cell = this.cells[row][col];
+        if (cell.fortified) {
+          cell.type = TileType.Brick;
+          cell.brick = fullBrick();
+          cell.fortified = false;
         }
       }
     }

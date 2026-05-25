@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { GAME_HEIGHT, GAME_WIDTH } from '../config/constants';
+import { COLORS, GAME_HEIGHT, GAME_WIDTH } from '../config/constants';
 import type { GameRegistryData } from '../config/GameRegistry';
 import { saveHighScore } from '../config/GameRegistry';
 
@@ -16,21 +16,47 @@ export class StageClearScene extends Phaser.Scene {
     }
 
     this.cameras.main.setBackgroundColor(0x000000);
-    this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 20, 'STAGE CLEAR', {
-      fontFamily: 'monospace',
-      fontSize: '20px',
-      color: '#f0a020',
-    }).setOrigin(0.5);
+    this.cameras.main.fadeIn(250);
 
-    this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 + 10, `SCORE ${gd.score}`, {
+    this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 36, `STAGE  ${gd.stage}`, {
       fontFamily: 'monospace',
       fontSize: '12px',
+      color: '#aaaaaa',
+    }).setOrigin(0.5);
+
+    this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 12, 'CLEAR', {
+      fontFamily: 'monospace',
+      fontSize: '24px',
+      color: '#eeb850',
+      fontStyle: 'bold',
+    }).setOrigin(0.5);
+
+    this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 + 18, 'TOTAL', {
+      fontFamily: 'monospace',
+      fontSize: '8px',
+      color: '#888888',
+    }).setOrigin(0.5);
+
+    this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 + 32, String(gd.score).padStart(7, '0'), {
+      fontFamily: 'monospace',
+      fontSize: '16px',
       color: '#ffffff',
     }).setOrigin(0.5);
 
+    if (gd.score >= gd.highScore) {
+      const hi = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 + 50, 'NEW HI-SCORE!', {
+        fontFamily: 'monospace',
+        fontSize: '9px',
+        color: COLORS.hudFlag === 0xe85020 ? '#e85020' : '#ff5020',
+      }).setOrigin(0.5);
+      this.tweens.add({ targets: hi, alpha: { from: 1, to: 0.3 }, duration: 400, yoyo: true, repeat: -1 });
+    }
+
     gd.stage++;
-    this.time.delayedCall(2000, () => {
-      this.scene.start('GameScene', { stage: gd.stage, gameData: gd });
+    this.time.delayedCall(2400, () => {
+      this.cameras.main.fadeOut(250, 0, 0, 0, (_c: Phaser.Cameras.Scene2D.Camera, p: number) => {
+        if (p >= 1) this.scene.start('GameScene', { stage: gd.stage, gameData: gd });
+      });
     });
   }
 }

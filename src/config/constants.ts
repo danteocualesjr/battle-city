@@ -1,10 +1,11 @@
 export const TILE_SIZE = 16;
 export const GRID_SIZE = 13;
-export const PLAYFIELD_SIZE = TILE_SIZE * GRID_SIZE;
-export const SIDEBAR_WIDTH = 48;
-export const GAME_WIDTH = PLAYFIELD_SIZE + SIDEBAR_WIDTH;
-export const GAME_HEIGHT = 240;
-export const SCALE = 2;
+export const PLAYFIELD_SIZE = TILE_SIZE * GRID_SIZE; // 208
+export const SIDEBAR_WIDTH = 64;
+export const PLAYFIELD_OFFSET_X = 8;
+export const PLAYFIELD_OFFSET_Y = 8;
+export const GAME_WIDTH = PLAYFIELD_OFFSET_X * 2 + PLAYFIELD_SIZE + SIDEBAR_WIDTH; // 8+208+64+8=288
+export const GAME_HEIGHT = PLAYFIELD_OFFSET_Y * 2 + PLAYFIELD_SIZE; // 224
 
 export const ENEMIES_PER_STAGE = 20;
 export const MAX_ACTIVE_ENEMIES = 4;
@@ -28,31 +29,60 @@ export const POWERUP_POSITIONS = [
 ] as const;
 
 export const COLORS = {
-  black: 0x000000,
-  sidebar: 0x6b6b6b,
-  sidebarDark: 0x4a4a4a,
-  brick: 0xc05830,
-  brickDark: 0x903820,
-  steel: 0xd0d0d0,
-  steelDark: 0x909090,
-  water: 0x2060c0,
-  forest: 0x208020,
-  ice: 0xe0e8f0,
-  player1: 0xf0a020,
-  player2: 0x40c040,
-  enemyBasic: 0xe0e0e0,
-  enemyFast: 0xc0c0c0,
-  enemyPower: 0xa0a0a0,
-  enemyArmor: 0x60a060,
+  background: 0x0a0a0a,
+  playfield: 0x000000,
+  sidebar: 0x8a8a8a,
+  sidebarShadow: 0x5a5a5a,
+
+  brick: 0xb05028,
+  brickLight: 0xd66838,
+  brickMortar: 0x4a1f10,
+
+  steel: 0xc8c8c8,
+  steelLight: 0xeaeaea,
+  steelDark: 0x6c6c6c,
+
+  water1: 0x2a5fb8,
+  water2: 0x4080d0,
+  forest: 0x2a8030,
+  forestLight: 0x55b048,
+  ice: 0xe8eef4,
+
+  player1Body: 0xeeb850,
+  player1Light: 0xfbe28a,
+  player1Dark: 0x8c5a08,
+
+  player2Body: 0x4cba4c,
+  player2Light: 0xa8e07a,
+  player2Dark: 0x186018,
+
+  enemyBasic: 0xe8e8e8,
+  enemyBasicDark: 0x808080,
+  enemyFast: 0xb0d8e0,
+  enemyFastDark: 0x508088,
+  enemyPower: 0xe89030,
+  enemyPowerDark: 0x804010,
+  enemyArmor: 0x60b060,
+  enemyArmorDark: 0x205020,
+
   bullet: 0xffffff,
-  base: 0x808080,
+  bulletShadow: 0xa8a8a8,
+
+  baseGray: 0xa8a8a8,
+  baseEagle: 0xe8e0a8,
+  baseEagleDark: 0x806000,
+
   hudText: 0xffffff,
-  titleBrick: 0xc04030,
+  hudFlag: 0xe85020,
+  hudStar: 0xffd040,
+
+  titleBrick: 0xc24a26,
+  titleBrickLight: 0xe07050,
 } as const;
 
-export const PLAYER_SPEED = 60;
-export const ENEMY_SPEED = { basic: 40, fast: 80, power: 55, armor: 55 } as const;
-export const BULLET_SPEED = { slow: 120, normal: 160, fast: 220 } as const;
+export const PLAYER_SPEED = 64;
+export const ENEMY_SPEED = { basic: 36, fast: 76, power: 50, armor: 50 } as const;
+export const BULLET_SPEED = { slow: 130, normal: 170, fast: 240 } as const;
 
 export type Direction = 'up' | 'down' | 'left' | 'right';
 

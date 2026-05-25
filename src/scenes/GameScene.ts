@@ -3,6 +3,8 @@ import {
   COLORS,
   GAME_HEIGHT,
   GAME_WIDTH,
+  PLAYFIELD_OFFSET_X,
+  PLAYFIELD_OFFSET_Y,
   PLAYFIELD_SIZE,
   TILE_SIZE,
   type Direction,
@@ -13,24 +15,34 @@ import { GameController } from '../game/GameController';
 import { LEVELS } from '../map/levels';
 import { TileMap } from '../map/TileMap';
 import { HUD } from '../ui/HUD';
+import { generateAllSprites } from '../render/Sprites';
 import type { EnemyState } from '../entities/types';
 
-const TANK_SIZE = 14;
+const TANK_OFFSET = -1; // tank sprite is 16x16, tank logical pos sits at +1 inside a 16px tile
 
 export class GameScene extends Phaser.Scene {
   private map!: TileMap;
   private controller!: GameController;
   private hud!: HUD;
   private gameData!: GameRegistryData;
-  private tankGfx!: Phaser.GameObjects.Graphics;
-  private bulletGfx!: Phaser.GameObjects.Graphics;
-  private powerGfx!: Phaser.GameObjects.Graphics;
+
+  private playfield!: Phaser.GameObjects.Container;
+  private playerSprite?: Phaser.GameObjects.Image;
+  private enemySprites: Phaser.GameObjects.Image[] = [];
+  private bulletSprites: Phaser.GameObjects.Image[] = [];
+  private powerSprite?: Phaser.GameObjects.Image;
+  private powerBg?: Phaser.GameObjects.Image;
+  private invincibleRing?: Phaser.GameObjects.Graphics;
+
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private fireKey!: Phaser.Input.Keyboard.Key;
   private pauseKey!: Phaser.Input.Keyboard.Key;
+  private restartKey!: Phaser.Input.Keyboard.Key;
+  private quitKey!: Phaser.Input.Keyboard.Key;
+
   private paused = false;
   private pauseOverlay!: Phaser.GameObjects.Container;
-  private stageBanner!: Phaser.GameObjects.Text;
+  private stageIntroOverlay!: Phaser.GameObjects.Container;
   private particles!: Phaser.GameObjects.Particles.ParticleEmitter;
   private lastEnemyCount = 0;
   private shovelTimer?: Phaser.Time.TimerEvent;
@@ -45,8 +57,25 @@ export class GameScene extends Phaser.Scene {
   }
 
   create(): void {
-    this.cameras.main.setBackgroundColor(COLORS.black);
-    this.cameras.main.fadeIn(300);
+    this.cameras.main.setBackgroundColor(COLORS.background);
+    generateAllSprites(this);
+
+    // Reset stale references between scene restarts.
+    this.playerSprite = undefined;
+    this.enemySprites = [];
+    this.bulletSprites = [];
+    this.powerSprite = undefined;
+    this.powerBg = undefined;
+    this.invincibleRing = undefined;
+    this.paused = false;
+    this.shovelTimer = undefined;
+
+    // Playfield frame: dark border + black inner area
+    this.add.rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, COLORS.background).setOrigin(0).setDepth(0);
+    this.add.rectangle(PLAYFIELD_OFFSET_X, PLAYFIELD_OFFSET_Y, PLAYFIELD_SIZE, PLAYFIELD_SIZE, COLORS.playfield).setOrigin(0).setDepth(0.5);
+
+    // Playfield container (everything inside the play area)
+    this.playfield = this.add.container(PLAYFIELD_OFFSET_X, PLAYFIELD_OFFSET_Y).setDepth(8);
 
     const stageIdx = Math.min(this.gameData.stage - 1, LEVELS.length - 1);
     this.map = new TileMap(this);
@@ -55,69 +84,61 @@ export class GameScene extends Phaser.Scene {
     this.controller = new GameController(this.map, this.gameData);
     this.controller.resetStage();
 
-    this.tankGfx = this.add.graphics().setDepth(10);
-    this.bulletGfx = this.add.graphics().setDepth(11);
-    this.powerGfx = this.add.graphics().setDepth(9);
     this.hud = new HUD(this);
 
-    this.stageBanner = this.add
-      .text(PLAYFIELD_SIZE / 2, GAME_HEIGHT / 2, `STAGE ${this.gameData.stage}`, {
-        fontFamily: 'monospace',
-        fontSize: '18px',
-        color: '#ffffff',
-      })
-      .setOrigin(0.5)
-      .setDepth(30)
-      .setAlpha(0);
-
-    this.tweens.add({
-      targets: this.stageBanner,
-      alpha: 1,
-      y: GAME_HEIGHT / 2 - 10,
-      duration: 400,
-      yoyo: true,
-      hold: 600,
-      onComplete: () => this.stageBanner.destroy(),
-    });
+    this.invincibleRing = this.add.graphics().setDepth(15);
 
     this.particles = this.add.particles(0, 0, 'particle', {
-      speed: { min: 40, max: 120 },
-      scale: { start: 1, end: 0 },
-      lifespan: 400,
-      quantity: 8,
+      speed: { min: 30, max: 100 },
+      scale: { start: 1.5, end: 0 },
+      lifespan: 350,
+      quantity: 0,
       emitting: false,
-    }).setDepth(15);
-
-    const particleTex = this.textures.createCanvas('particle', 4, 4);
-    if (particleTex) {
-      const ctx = particleTex.getContext();
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, 4, 4);
-      particleTex.refresh();
-    }
+    }).setDepth(16);
 
     this.cursors = this.input.keyboard!.createCursorKeys();
     this.fireKey = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
     this.pauseKey = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
+    this.restartKey = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.R);
+    this.quitKey = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.Q);
 
     this.buildPauseOverlay();
+    this.buildStageIntro();
     this.lastEnemyCount = this.controller.enemies.length;
 
-    this.cameras.main.fadeIn(300);
+    this.cameras.main.fadeIn(250);
+  }
+
+  private buildStageIntro(): void {
+    this.stageIntroOverlay = this.add.container(0, 0).setDepth(60);
+    const bg = this.add.rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, 0x7d7d7d).setOrigin(0);
+    const txt = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2, `STAGE  ${this.gameData.stage}`, {
+      fontFamily: 'monospace',
+      fontSize: '16px',
+      color: '#000000',
+    }).setOrigin(0.5);
+    this.stageIntroOverlay.add([bg, txt]);
+    this.tweens.add({
+      targets: this.stageIntroOverlay,
+      alpha: 0,
+      delay: 1500,
+      duration: 350,
+      onComplete: () => this.stageIntroOverlay.setVisible(false),
+    });
   }
 
   private buildPauseOverlay(): void {
     this.pauseOverlay = this.add.container(0, 0).setDepth(50).setVisible(false);
-    const bg = this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x000000, 0.7);
-    const txt = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 20, 'PAUSED', {
+    const bg = this.add.rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, 0x000000, 0.7).setOrigin(0);
+    const txt = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 14, 'PAUSE', {
       fontFamily: 'monospace',
-      fontSize: '18px',
-      color: '#ffffff',
+      fontSize: '20px',
+      color: '#e85020',
     }).setOrigin(0.5);
-    const hint = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 + 10, 'ESC resume · R restart · Q quit', {
+    const hint = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 + 14, 'ESC resume · R restart · Q quit', {
       fontFamily: 'monospace',
-      fontSize: '10px',
-      color: '#cccccc',
+      fontSize: '8px',
+      color: '#ffffff',
     }).setOrigin(0.5);
     this.pauseOverlay.add([bg, txt, hint]);
   }
@@ -131,11 +152,11 @@ export class GameScene extends Phaser.Scene {
     }
     if (this.paused) return;
 
-    if (this.input.keyboard?.checkDown(this.input.keyboard.addKey('R'), 500)) {
+    if (Phaser.Input.Keyboard.JustDown(this.restartKey)) {
       this.scene.restart({ stage: this.gameData.stage, gameData: this.gameData });
       return;
     }
-    if (this.input.keyboard?.checkDown(this.input.keyboard.addKey('Q'), 500)) {
+    if (Phaser.Input.Keyboard.JustDown(this.quitKey)) {
       this.scene.start('MainMenuScene');
       return;
     }
@@ -170,6 +191,14 @@ export class GameScene extends Phaser.Scene {
       return;
     }
 
+    if (this.controller.shovelActive && !this.shovelTimer) {
+      this.shovelTimer = this.time.delayedCall(15_000, () => {
+        this.map.unfortifyBase();
+        this.controller.shovelActive = false;
+        this.shovelTimer = undefined;
+      });
+    }
+
     this.trackExplosions();
     this.render();
     this.hud.update(
@@ -178,6 +207,7 @@ export class GameScene extends Phaser.Scene {
       this.gameData.stage,
       this.gameData.score,
       this.gameData.starLevel,
+      this.gameData.highScore,
     );
   }
 
@@ -192,89 +222,134 @@ export class GameScene extends Phaser.Scene {
 
   private burst(x: number, y: number, color: number): void {
     this.particles.setParticleTint(color);
-    this.particles.explode(10, x, y);
+    this.particles.explode(12, PLAYFIELD_OFFSET_X + x, PLAYFIELD_OFFSET_Y + y);
   }
 
   private render(): void {
-    this.tankGfx.clear();
-    this.bulletGfx.clear();
-    this.powerGfx.clear();
+    this.invincibleRing!.clear();
 
+    // Player
     if (this.controller.player.alive) {
-      this.drawTank(
-        this.controller.player.x,
-        this.controller.player.y,
-        this.controller.player.direction,
-        COLORS.player1,
-        this.controller.player.invincible,
-      );
+      if (!this.playerSprite) {
+        this.playerSprite = this.add.image(0, 0, 'tank-p1-up').setOrigin(0).setDepth(10);
+        this.playfield.add(this.playerSprite);
+      }
+      this.playerSprite.setVisible(true);
+      this.playerSprite.setTexture(`tank-p1-${this.controller.player.direction}`);
+      this.playerSprite.setPosition(this.controller.player.x + TANK_OFFSET, this.controller.player.y + TANK_OFFSET);
+
+      const pCol = Math.floor((this.controller.player.x + 7) / TILE_SIZE);
+      const pRow = Math.floor((this.controller.player.y + 7) / TILE_SIZE);
+      this.playerSprite.setAlpha(this.map.isForest(pCol, pRow) ? 0.25 : 1);
+
+      if (this.controller.player.invincible) {
+        this.drawInvincibleRing(this.controller.player.x, this.controller.player.y);
+      }
+    } else if (this.playerSprite) {
+      this.playerSprite.setVisible(false);
     }
 
+    // Enemies
+    let i = 0;
     for (const e of this.controller.enemies) {
       if (!e.alive) continue;
-      const color = this.enemyColor(e);
-      this.drawTank(e.x, e.y, e.direction, color, false, e.flashing);
+      if (!this.enemySprites[i]) {
+        const img = this.add.image(0, 0, 'tank-e-basic-down').setOrigin(0).setDepth(10);
+        this.playfield.add(img);
+        this.enemySprites[i] = img;
+      }
+      const sprite = this.enemySprites[i]!;
+      const tex = this.enemyTexture(e);
+      sprite.setTexture(tex);
+      sprite.setPosition(e.x + TANK_OFFSET, e.y + TANK_OFFSET);
+      sprite.setVisible(true);
+
+      const eCol = Math.floor((e.x + 7) / TILE_SIZE);
+      const eRow = Math.floor((e.y + 7) / TILE_SIZE);
+      sprite.setAlpha(this.map.isForest(eCol, eRow) ? 0.25 : 1);
+
+      if (e.flashing) {
+        const flick = Math.floor(this.time.now / 80) % 2 === 0;
+        sprite.setTint(flick ? 0xff8080 : 0xffffff);
+      } else {
+        sprite.clearTint();
+      }
+      i++;
+    }
+    for (let j = i; j < this.enemySprites.length; j++) {
+      this.enemySprites[j]!.setVisible(false);
     }
 
+    // Bullets
+    let bi = 0;
     for (const b of this.controller.bullets) {
-      this.bulletGfx.fillStyle(COLORS.bullet, 1);
-      this.bulletGfx.fillRect(b.x - 2, b.y - 2, 4, 4);
+      if (!b.active) continue;
+      if (!this.bulletSprites[bi]) {
+        const img = this.add.image(0, 0, 'bullet-up').setOrigin(0.5).setDepth(11);
+        this.playfield.add(img);
+        this.bulletSprites[bi] = img;
+      }
+      const s = this.bulletSprites[bi]!;
+      const tex = b.direction === 'up' || b.direction === 'down' ? 'bullet-up' : 'bullet-h';
+      s.setTexture(tex);
+      s.setRotation(b.direction === 'down' ? Math.PI : b.direction === 'left' ? Math.PI : 0);
+      // For h direction we keep texture as is (it's symmetric)
+      s.setPosition(b.x, b.y);
+      s.setVisible(true);
+      bi++;
+    }
+    for (let j = bi; j < this.bulletSprites.length; j++) {
+      this.bulletSprites[j]!.setVisible(false);
     }
 
+    // Power-up
     if (this.controller.powerUp?.active) {
       const p = this.controller.powerUp;
-      const blink = Math.sin(this.time.now / 120) > 0;
-      this.powerGfx.fillStyle(0xf0f040, blink ? 1 : 0.4);
-      this.powerGfx.fillRect(p.x + 4, p.y + 4, 8, 8);
+      if (!this.powerBg) {
+        this.powerBg = this.add.image(0, 0, 'pu-bg').setOrigin(0).setDepth(9);
+        this.playfield.add(this.powerBg);
+      }
+      if (!this.powerSprite) {
+        this.powerSprite = this.add.image(0, 0, 'pu-star').setOrigin(0).setDepth(9.5);
+        this.playfield.add(this.powerSprite);
+      }
+      this.powerBg.setPosition(p.x, p.y).setVisible(true);
+      this.powerSprite.setTexture(`pu-${p.kind}`).setPosition(p.x, p.y).setVisible(true);
+      const blink = Math.sin(this.time.now / 140) > 0;
+      this.powerBg.setAlpha(blink ? 1 : 0.2);
+      this.powerSprite.setAlpha(blink ? 1 : 0.2);
+    } else {
+      this.powerBg?.setVisible(false);
+      this.powerSprite?.setVisible(false);
     }
-
-    const px = this.controller.player.x + 7;
-    const py = this.controller.player.y + 7;
-    const pCol = Math.floor(px / TILE_SIZE);
-    const pRow = Math.floor(py / TILE_SIZE);
-    this.tankGfx.setAlpha(this.map.isForest(pCol, pRow) ? 0.3 : 1);
   }
 
-  private enemyColor(e: EnemyState): number {
+  private drawInvincibleRing(x: number, y: number): void {
+    const t = this.time.now / 60;
+    const r = this.invincibleRing!;
+    r.lineStyle(1, 0xffffff, 1);
+    const ox = PLAYFIELD_OFFSET_X + x - 1;
+    const oy = PLAYFIELD_OFFSET_Y + y - 1;
+    if (Math.floor(t) % 2 === 0) {
+      r.strokeRect(ox, oy, 16, 16);
+      r.lineStyle(1, 0x80c0ff, 1);
+      r.strokeRect(ox + 2, oy + 2, 12, 12);
+    } else {
+      r.strokeRect(ox + 2, oy + 2, 12, 12);
+      r.lineStyle(1, 0x80c0ff, 1);
+      r.strokeRect(ox, oy, 16, 16);
+    }
+  }
+
+  private enemyTexture(e: EnemyState): string {
+    const dir = e.direction;
     if (e.kind === 'armor') {
       const dmg = e.maxHp - e.hp;
-      return [COLORS.enemyArmor, 0x508050, 0x707070, 0x909090][dmg] ?? COLORS.enemyArmor;
+      const variants = ['e-armor', 'e-armor-1', 'e-armor-2', 'e-armor-3'];
+      const v = variants[Math.min(dmg, 3)];
+      return `tank-${v}-${dir}`;
     }
-    return { basic: COLORS.enemyBasic, fast: COLORS.enemyFast, power: COLORS.enemyPower, armor: COLORS.enemyArmor }[e.kind];
-  }
-
-  private drawTank(
-    x: number,
-    y: number,
-    dir: Direction,
-    color: number,
-    invincible: boolean,
-    flashing = false,
-  ): void {
-    if (invincible || flashing) {
-      this.tankGfx.lineStyle(1, 0xffffff, Math.sin(this.time.now / 80) * 0.5 + 0.5);
-      this.tankGfx.strokeRect(x - 1, y - 1, TANK_SIZE + 2, TANK_SIZE + 2);
-    }
-    this.tankGfx.fillStyle(color, 1);
-    this.tankGfx.fillRect(x + 2, y + 2, TANK_SIZE - 4, TANK_SIZE - 4);
-    this.tankGfx.fillStyle(0x333333, 1);
-    const barrel = 5;
-    const cx = x + TANK_SIZE / 2;
-    const cy = y + TANK_SIZE / 2;
-    switch (dir) {
-      case 'up':
-        this.tankGfx.fillRect(cx - 1, y, 2, barrel);
-        break;
-      case 'down':
-        this.tankGfx.fillRect(cx - 1, y + TANK_SIZE - barrel, 2, barrel);
-        break;
-      case 'left':
-        this.tankGfx.fillRect(x, cy - 1, barrel, 2);
-        break;
-      case 'right':
-        this.tankGfx.fillRect(x + TANK_SIZE - barrel, cy - 1, barrel, 2);
-        break;
-    }
+    return `tank-e-${e.kind}-${dir}`;
   }
 
   shutdown(): void {
