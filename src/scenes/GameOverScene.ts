@@ -75,8 +75,10 @@ export class GameOverScene extends Phaser.Scene {
 
     const hint = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT - 24, 'PRESS ENTER', {
       fontFamily: 'monospace',
-      fontSize: '9px',
+      fontSize: '10px',
       color: '#eeb850',
+      backgroundColor: '#1a1a1a',
+      padding: { x: 6, y: 3 },
     }).setOrigin(0.5);
     this.tweens.add({ targets: hint, alpha: { from: 1, to: 0.3 }, duration: 500, yoyo: true, repeat: -1 });
 
