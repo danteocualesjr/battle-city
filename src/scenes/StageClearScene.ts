@@ -24,12 +24,13 @@ export class StageClearScene extends Phaser.Scene {
       color: '#aaaaaa',
     }).setOrigin(0.5);
 
-    this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 12, 'CLEAR', {
+    const clearTxt = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 12, 'CLEAR', {
       fontFamily: 'monospace',
       fontSize: '24px',
       color: '#eeb850',
       fontStyle: 'bold',
-    }).setOrigin(0.5);
+    }).setOrigin(0.5).setScale(0.5);
+    this.tweens.add({ targets: clearTxt, scale: 1, duration: 500, ease: 'Back.easeOut' });
 
     this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 + 18, 'TOTAL', {
       fontFamily: 'monospace',
