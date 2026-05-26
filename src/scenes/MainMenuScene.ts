@@ -156,6 +156,14 @@ export class MainMenuScene extends Phaser.Scene {
   }
 
   private drawLetter(x: number, y: number, pattern: string[], cs: number): void {
+    const shadow = this.add.graphics();
+    shadow.fillStyle(0x000000, 0.45);
+    for (let r = 0; r < pattern.length; r++) {
+      const row = pattern[r]!;
+      for (let c = 0; c < row.length; c++) {
+        if (row[c] === '#') shadow.fillRect(x + c * cs + 2, y + r * cs + 2, cs, cs);
+      }
+    }
     const g = this.add.graphics();
     for (let r = 0; r < pattern.length; r++) {
       const row = pattern[r]!;
