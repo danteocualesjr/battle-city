@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { COLORS, GAME_HEIGHT, GAME_WIDTH, UI_FONT } from '../config/constants';
 import type { GameRegistryData } from '../config/GameRegistry';
 import { saveHighScore } from '../config/GameRegistry';
+import { drawCornerFrame, TEXT_SHADOW } from '../ui/UiHelpers';
 
 export class StageClearScene extends Phaser.Scene {
   constructor() {
@@ -10,12 +11,13 @@ export class StageClearScene extends Phaser.Scene {
 
   create(data: { gameData: GameRegistryData }): void {
     const gd = data.gameData;
-    if (gd.score > gd.highScore) {
+    const newHigh = gd.score > gd.highScore;
+    if (newHigh) {
       gd.highScore = gd.score;
       saveHighScore(gd.score);
     }
 
-    this.cameras.main.setBackgroundColor(0x000000);
+    this.cameras.main.setBackgroundColor(0x0a0a0a);
     this.cameras.main.fadeIn(400);
 
     this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 36, `STAGE  ${gd.stage}`, {
@@ -29,8 +31,9 @@ export class StageClearScene extends Phaser.Scene {
       fontSize: '24px',
       color: '#eeb850',
       fontStyle: 'bold',
-    }).setOrigin(0.5).setScale(0.5);
-    this.tweens.add({ targets: clearTxt, scale: 1, duration: 500, ease: 'Back.easeOut' });
+      shadow: TEXT_SHADOW,
+    }).setOrigin(0.5).setScale(0.4);
+    this.tweens.add({ targets: clearTxt, scale: 1, duration: 550, ease: 'Back.easeOut' });
 
     this.add.particles(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 12, 'particle', {
       speed: { min: 40, max: 120 },
@@ -53,7 +56,9 @@ export class StageClearScene extends Phaser.Scene {
       fontFamily: UI_FONT,
       fontSize: '16px',
       color: '#ffffff',
-    }).setOrigin(0.5);
+      shadow: TEXT_SHADOW,
+    }).setOrigin(0.5).setAlpha(0);
+    this.tweens.add({ targets: scoreTxt, alpha: 1, delay: 300, duration: 400 });
 
     if (gd.score >= gd.highScore) {
       const hi = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 + 50, 'NEW HI-SCORE!', {
@@ -61,12 +66,20 @@ export class StageClearScene extends Phaser.Scene {
         fontSize: '9px',
         color: '#e85020',
       }).setOrigin(0.5);
-      this.tweens.add({ targets: hi, alpha: { from: 1, to: 0.3 }, duration: 400, yoyo: true, repeat: -1 });
+      this.tweens.add({ targets: hi, alpha: { from: 1, to: 0.35 }, duration: 400, yoyo: true, repeat: -1 });
     }
 
+    const next = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT - 18, `NEXT: STAGE ${gd.stage + 1}`, {
+      fontFamily: 'monospace',
+      fontSize: '7px',
+      color: '#666666',
+    }).setOrigin(0.5);
+
+    this.tweens.add({ targets: next, alpha: { from: 0.4, to: 1 }, duration: 600, yoyo: true, repeat: -1 });
+
     gd.stage++;
-    this.time.delayedCall(2400, () => {
-      this.cameras.main.fadeOut(250, 0, 0, 0, (_c: Phaser.Cameras.Scene2D.Camera, p: number) => {
+    this.time.delayedCall(2600, () => {
+      this.cameras.main.fadeOut(300, 0, 0, 0, (_c: Phaser.Cameras.Scene2D.Camera, p: number) => {
         if (p >= 1) this.scene.start('GameScene', { stage: gd.stage, gameData: gd });
       });
     });

@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { COLORS, GAME_HEIGHT, GAME_WIDTH, UI_FONT } from '../config/constants';
 import { createDefaultRegistry, loadHighScore } from '../config/GameRegistry';
 import { generateAllSprites } from '../render/Sprites';
+import { addStarfield, drawCornerFrame, TEXT_SHADOW } from '../ui/UiHelpers';
 
 const TITLE_LETTERS: Record<string, string[]> = {
   B: ['#####.', '#....#', '#####.', '#....#', '#####.'],
@@ -45,20 +46,20 @@ export class MainMenuScene extends Phaser.Scene {
     }).setOrigin(1, 0);
 
     const frame = this.add.graphics();
-    frame.lineStyle(2, COLORS.uiAccent, 0.5);
+    frame.lineStyle(1, 0xffffff, 0.12);
     frame.strokeRect(12, 32, GAME_WIDTH - 24, GAME_HEIGHT - 64);
-    frame.lineStyle(1, 0xffffff, 0.15);
-    frame.strokeRect(14, 34, GAME_WIDTH - 28, GAME_HEIGHT - 68);
+    drawCornerFrame(frame, 12, 32, GAME_WIDTH - 24, GAME_HEIGHT - 64, COLORS.uiAccent, 0.55, 14);
 
     this.add.text(GAME_WIDTH - 14, 22, 'v1.0', {
       fontFamily: UI_FONT,
       fontSize: '6px',
-      color: '#666666',
+      color: '#555555',
     }).setOrigin(1, 0);
 
     this.drawTitle();
+    this.addDecorTanks();
 
-    const startY = 150;
+    const startY = 152;
     this.options.forEach((opt, i) => {
       const t = this.add.text(GAME_WIDTH / 2 + 6, startY + i * 18, opt, {
         fontFamily: UI_FONT,
@@ -68,8 +69,8 @@ export class MainMenuScene extends Phaser.Scene {
       this.labels.push(t);
     });
 
-    this.cursor = this.add.image(GAME_WIDTH / 2 - 40, startY, 'tank-p1-right').setOrigin(0, 0.5);
-    this.tweens.add({ targets: this.cursor, x: '+=3', duration: 350, yoyo: true, repeat: -1 });
+    this.cursor = this.add.image(GAME_WIDTH / 2 - 72, startY, 'tank-p1-right').setOrigin(0, 0.5);
+    this.tweens.add({ targets: this.cursor, x: '+=4', duration: 320, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
 
     const pressStart = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT - 42, 'PRESS START', {
       fontFamily: UI_FONT,
@@ -89,6 +90,8 @@ export class MainMenuScene extends Phaser.Scene {
       fontSize: '6px',
       color: '#777777',
     }).setOrigin(0.5);
+
+    this.refreshMenuLabels();
 
     this.input.keyboard?.on('keydown-UP', () => this.moveCursor(-1));
     this.input.keyboard?.on('keydown-DOWN', () => this.moveCursor(1));
@@ -177,10 +180,16 @@ export class MainMenuScene extends Phaser.Scene {
 
   private moveCursor(dir: number): void {
     this.selected = Phaser.Math.Wrap(this.selected + dir, 0, this.options.length);
-    this.cursor.y = 150 + this.selected * 18;
+    this.cursor.y = 152 + this.selected * 20;
+    this.refreshMenuLabels();
+  }
+
+  private refreshMenuLabels(): void {
     this.labels.forEach((l, i) => {
-      l.setColor(i === this.selected ? '#eeb850' : '#ffffff');
-      l.setScale(i === this.selected ? 1.05 : 1);
+      const on = i === this.selected;
+      l.setColor(on ? '#eeb850' : '#888888');
+      l.setScale(on ? 1.08 : 1);
+      l.setText(on ? `▶ ${this.options[i]} ◀` : this.options[i]!);
     });
   }
 
