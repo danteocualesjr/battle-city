@@ -17,6 +17,7 @@ const config: Phaser.Types.Core.GameConfig = {
   scale: {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
+    max: { width: GAME_WIDTH * 4, height: GAME_HEIGHT * 4 },
   },
   scene: [BootScene, MainMenuScene, GameScene, StageClearScene, GameOverScene],
   physics: {

@@ -85,10 +85,22 @@ export class MainMenuScene extends Phaser.Scene {
       fontSize: '10px',
       color: '#ffffff',
     });
-    this.add.text(GAME_WIDTH - 20, 12, `HI- ${data.highScore}`, {
+    this.add.text(GAME_WIDTH - 20, 12, `HI- ${String(data.highScore).padStart(6, '0')}`, {
       fontFamily: 'monospace',
       fontSize: '10px',
       color: '#ffffff',
+    }).setOrigin(1, 0);
+
+    const frame = this.add.graphics();
+    frame.lineStyle(2, COLORS.uiAccent, 0.5);
+    frame.strokeRect(12, 32, GAME_WIDTH - 24, GAME_HEIGHT - 64);
+    frame.lineStyle(1, 0xffffff, 0.15);
+    frame.strokeRect(14, 34, GAME_WIDTH - 28, GAME_HEIGHT - 68);
+
+    this.add.text(GAME_WIDTH - 14, 22, 'v1.0', {
+      fontFamily: 'monospace',
+      fontSize: '6px',
+      color: '#666666',
     }).setOrigin(1, 0);
 
     this.drawTitle();
@@ -109,13 +121,13 @@ export class MainMenuScene extends Phaser.Scene {
     this.add.text(GAME_WIDTH / 2, GAME_HEIGHT - 28, '↑ ↓  SELECT     ENTER  CONFIRM', {
       fontFamily: 'monospace',
       fontSize: '7px',
-      color: '#888888',
+      color: '#999999',
     }).setOrigin(0.5);
 
     this.add.text(GAME_WIDTH / 2, GAME_HEIGHT - 14, 'fan tribute · NAMCO 1985', {
       fontFamily: 'monospace',
       fontSize: '7px',
-      color: '#666666',
+      color: '#777777',
     }).setOrigin(0.5);
 
     this.input.keyboard?.on('keydown-UP', () => this.moveCursor(-1));
@@ -125,7 +137,7 @@ export class MainMenuScene extends Phaser.Scene {
     this.input.keyboard?.on('keydown-ENTER', () => this.confirm());
     this.input.keyboard?.on('keydown-SPACE', () => this.confirm());
 
-    this.cameras.main.fadeIn(300);
+    this.cameras.main.fadeIn(450);
   }
 
   private drawTitle(): void {
@@ -150,6 +162,14 @@ export class MainMenuScene extends Phaser.Scene {
   }
 
   private drawLetter(x: number, y: number, pattern: string[], cs: number): void {
+    const shadow = this.add.graphics();
+    shadow.fillStyle(0x000000, 0.45);
+    for (let r = 0; r < pattern.length; r++) {
+      const row = pattern[r]!;
+      for (let c = 0; c < row.length; c++) {
+        if (row[c] === '#') shadow.fillRect(x + c * cs + 2, y + r * cs + 2, cs, cs);
+      }
+    }
     const g = this.add.graphics();
     for (let r = 0; r < pattern.length; r++) {
       const row = pattern[r]!;
@@ -170,7 +190,10 @@ export class MainMenuScene extends Phaser.Scene {
   private moveCursor(dir: number): void {
     this.selected = Phaser.Math.Wrap(this.selected + dir, 0, this.options.length);
     this.cursor.y = 150 + this.selected * 18;
-    this.labels.forEach((l, i) => l.setColor(i === this.selected ? '#eeb850' : '#ffffff'));
+    this.labels.forEach((l, i) => {
+      l.setColor(i === this.selected ? '#eeb850' : '#ffffff');
+      l.setScale(i === this.selected ? 1.05 : 1);
+    });
   }
 
   private confirm(): void {

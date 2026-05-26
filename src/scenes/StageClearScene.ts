@@ -16,20 +16,23 @@ export class StageClearScene extends Phaser.Scene {
     }
 
     this.cameras.main.setBackgroundColor(0x000000);
-    this.cameras.main.fadeIn(250);
+    this.cameras.main.fadeIn(400);
 
     this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 36, `STAGE  ${gd.stage}`, {
       fontFamily: 'monospace',
-      fontSize: '12px',
-      color: '#aaaaaa',
+      fontSize: '14px',
+      color: '#cccccc',
     }).setOrigin(0.5);
 
-    this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 12, 'CLEAR', {
+    const clearTxt = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 12, 'CLEAR', {
       fontFamily: 'monospace',
       fontSize: '24px',
       color: '#eeb850',
       fontStyle: 'bold',
-    }).setOrigin(0.5);
+    }).setOrigin(0.5).setScale(0.5);
+    this.tweens.add({ targets: clearTxt, scale: 1, duration: 500, ease: 'Back.easeOut' });
+
+    this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2 + 8, 120, 1, 0x444444).setOrigin(0.5);
 
     this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 + 18, 'TOTAL', {
       fontFamily: 'monospace',
