@@ -129,7 +129,7 @@ export class GameScene extends Phaser.Scene {
 
   private buildPauseOverlay(): void {
     this.pauseOverlay = this.add.container(0, 0).setDepth(50).setVisible(false);
-    const bg = this.add.rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, 0x000000, 0.7).setOrigin(0);
+    const bg = this.add.rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, COLORS.pauseOverlay, COLORS.pauseDim).setOrigin(0);
     const txt = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 14, 'PAUSE', {
       fontFamily: 'monospace',
       fontSize: '20px',
