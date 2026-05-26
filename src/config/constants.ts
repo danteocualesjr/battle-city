@@ -7,6 +7,9 @@ export const PLAYFIELD_OFFSET_Y = 8;
 export const GAME_WIDTH = PLAYFIELD_OFFSET_X * 2 + PLAYFIELD_SIZE + SIDEBAR_WIDTH; // 8+208+64+8=288
 export const GAME_HEIGHT = PLAYFIELD_OFFSET_Y * 2 + PLAYFIELD_SIZE; // 224
 
+/** Loaded via index.html — use for all in-game UI text */
+export const UI_FONT = "'Press Start 2P', monospace";
+
 export const ENEMIES_PER_STAGE = 20;
 export const MAX_ACTIVE_ENEMIES = 4;
 export const STARTING_LIVES = 3;

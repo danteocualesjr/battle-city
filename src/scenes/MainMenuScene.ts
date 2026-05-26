@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { COLORS, GAME_HEIGHT, GAME_WIDTH } from '../config/constants';
+import { COLORS, GAME_HEIGHT, GAME_WIDTH, UI_FONT } from '../config/constants';
 import { createDefaultRegistry, loadHighScore } from '../config/GameRegistry';
 import { generateAllSprites } from '../render/Sprites';
 import { addStarfield, drawCornerFrame, TEXT_SHADOW } from '../ui/UiHelpers';
@@ -28,22 +28,21 @@ export class MainMenuScene extends Phaser.Scene {
   create(): void {
     this.cameras.main.setBackgroundColor(COLORS.background);
     generateAllSprites(this);
-    addStarfield(this);
+    this.drawBackgroundGrid();
+    this.spawnMenuTanks();
 
     const data = createDefaultRegistry();
     data.highScore = loadHighScore();
 
-    this.add.text(20, 12, '1P  000000', {
-      fontFamily: 'monospace',
-      fontSize: '9px',
-      color: '#cccccc',
-      shadow: TEXT_SHADOW,
+    this.add.text(20, 12, 'I-      00', {
+      fontFamily: UI_FONT,
+      fontSize: '8px',
+      color: '#ffffff',
     });
-    this.add.text(GAME_WIDTH - 20, 12, `HI  ${String(data.highScore).padStart(6, '0')}`, {
-      fontFamily: 'monospace',
-      fontSize: '9px',
-      color: '#eeb850',
-      shadow: TEXT_SHADOW,
+    this.add.text(GAME_WIDTH - 20, 12, `HI- ${String(data.highScore).padStart(6, '0')}`, {
+      fontFamily: UI_FONT,
+      fontSize: '8px',
+      color: '#ffffff',
     }).setOrigin(1, 0);
 
     const frame = this.add.graphics();
@@ -51,8 +50,8 @@ export class MainMenuScene extends Phaser.Scene {
     frame.strokeRect(12, 32, GAME_WIDTH - 24, GAME_HEIGHT - 64);
     drawCornerFrame(frame, 12, 32, GAME_WIDTH - 24, GAME_HEIGHT - 64, COLORS.uiAccent, 0.55, 14);
 
-    this.add.text(GAME_WIDTH - 14, 22, 'v1.1', {
-      fontFamily: 'monospace',
+    this.add.text(GAME_WIDTH - 14, 22, 'v1.0', {
+      fontFamily: UI_FONT,
       fontSize: '6px',
       color: '#555555',
     }).setOrigin(1, 0);
@@ -62,29 +61,34 @@ export class MainMenuScene extends Phaser.Scene {
 
     const startY = 152;
     this.options.forEach((opt, i) => {
-      const t = this.add.text(GAME_WIDTH / 2, startY + i * 20, opt, {
-        fontFamily: 'monospace',
-        fontSize: '11px',
-        color: '#888888',
-        shadow: TEXT_SHADOW,
-      }).setOrigin(0.5, 0.5);
+      const t = this.add.text(GAME_WIDTH / 2 + 6, startY + i * 18, opt, {
+        fontFamily: UI_FONT,
+        fontSize: '8px',
+        color: '#ffffff',
+      }).setOrigin(0, 0.5);
       this.labels.push(t);
     });
 
     this.cursor = this.add.image(GAME_WIDTH / 2 - 72, startY, 'tank-p1-right').setOrigin(0, 0.5);
     this.tweens.add({ targets: this.cursor, x: '+=4', duration: 320, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
 
-    this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT - 30, 200, 14, 0x000000, 0.35).setOrigin(0.5);
-    this.add.text(GAME_WIDTH / 2, GAME_HEIGHT - 30, '↑↓ SELECT   ENTER START', {
-      fontFamily: 'monospace',
-      fontSize: '7px',
-      color: '#bbbbbb',
+    const pressStart = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT - 42, 'PRESS START', {
+      fontFamily: UI_FONT,
+      fontSize: '8px',
+      color: '#eeb850',
+    }).setOrigin(0.5);
+    this.tweens.add({ targets: pressStart, alpha: { from: 1, to: 0.25 }, duration: 700, yoyo: true, repeat: -1 });
+
+    this.add.text(GAME_WIDTH / 2, GAME_HEIGHT - 28, '↑ ↓  SELECT     ENTER  CONFIRM', {
+      fontFamily: UI_FONT,
+      fontSize: '6px',
+      color: '#999999',
     }).setOrigin(0.5);
 
-    this.add.text(GAME_WIDTH / 2, GAME_HEIGHT - 12, 'fan tribute · NAMCO 1985', {
-      fontFamily: 'monospace',
+    this.add.text(GAME_WIDTH / 2, GAME_HEIGHT - 14, 'fan tribute · NAMCO 1985', {
+      fontFamily: UI_FONT,
       fontSize: '6px',
-      color: '#555555',
+      color: '#777777',
     }).setOrigin(0.5);
 
     this.refreshMenuLabels();
@@ -99,10 +103,33 @@ export class MainMenuScene extends Phaser.Scene {
     this.cameras.main.fadeIn(450);
   }
 
-  private addDecorTanks(): void {
-    const left = this.add.image(36, 118, 'tank-e-basic-right').setAlpha(0.35).setFlipX(true);
-    const right = this.add.image(GAME_WIDTH - 36, 118, 'tank-p2-left').setAlpha(0.35);
-    this.tweens.add({ targets: [left, right], y: '+=2', duration: 900, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+  private drawBackgroundGrid(): void {
+    const g = this.add.graphics().setDepth(1).setAlpha(0.12);
+    g.lineStyle(1, COLORS.uiAccent, 1);
+    for (let x = 0; x < GAME_WIDTH; x += 16) {
+      g.lineBetween(x, 32, x, GAME_HEIGHT - 32);
+    }
+    for (let y = 32; y < GAME_HEIGHT - 32; y += 16) {
+      g.lineBetween(12, y, GAME_WIDTH - 12, y);
+    }
+  }
+
+  private spawnMenuTanks(): void {
+    const tanks = [
+      { key: 'tank-e-basic-right', y: 118, dir: 1 },
+      { key: 'tank-p1-right', y: 132, dir: 1 },
+      { key: 'tank-e-fast-left', y: 146, dir: -1 },
+    ];
+    tanks.forEach(({ key, y, dir }) => {
+      const t = this.add.image(dir > 0 ? -20 : GAME_WIDTH + 20, y, key).setDepth(2).setAlpha(0.35);
+      this.tweens.add({
+        targets: t,
+        x: dir > 0 ? GAME_WIDTH + 20 : -20,
+        duration: 8000 + Math.random() * 4000,
+        repeat: -1,
+        ease: 'Linear',
+      });
+    });
   }
 
   private drawTitle(): void {
@@ -182,10 +209,11 @@ export class MainMenuScene extends Phaser.Scene {
 
   private showSoon(msg: string): void {
     const t = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT - 50, msg, {
-      fontFamily: 'monospace',
-      fontSize: '8px',
+      fontFamily: UI_FONT,
+      fontSize: '7px',
       color: '#eeb850',
-      shadow: TEXT_SHADOW,
+      backgroundColor: '#1a1a1a',
+      padding: { x: 6, y: 4 },
     }).setOrigin(0.5);
     this.time.delayedCall(1500, () => t.destroy());
   }

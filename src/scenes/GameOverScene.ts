@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { COLORS, GAME_HEIGHT, GAME_WIDTH } from '../config/constants';
+import { COLORS, GAME_HEIGHT, GAME_WIDTH, UI_FONT } from '../config/constants';
 import type { GameRegistryData } from '../config/GameRegistry';
 import { saveHighScore } from '../config/GameRegistry';
 import { addStarfield, drawCornerFrame, TEXT_SHADOW } from '../ui/UiHelpers';
@@ -25,7 +25,7 @@ export class GameOverScene extends Phaser.Scene {
     drawCornerFrame(frame, 16, 16, GAME_WIDTH - 32, GAME_HEIGHT - 32, COLORS.uiAccent, 0.4, 12);
 
     this.add.text(GAME_WIDTH / 2 + 2, GAME_HEIGHT + 42, 'GAME\nOVER', {
-      fontFamily: 'monospace',
+      fontFamily: UI_FONT,
       fontSize: '28px',
       color: '#000000',
       align: 'center',
@@ -33,7 +33,7 @@ export class GameOverScene extends Phaser.Scene {
     }).setOrigin(0.5);
 
     const title = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT + 40, 'GAME\nOVER', {
-      fontFamily: 'monospace',
+      fontFamily: UI_FONT,
       fontSize: '28px',
       color: '#d63020',
       align: 'center',
@@ -53,44 +53,35 @@ export class GameOverScene extends Phaser.Scene {
     this.tweens.add({ targets: panel, alpha: 1, delay: 900, duration: 300 });
 
     if (data.baseDestroyed) {
-      this.time.delayedCall(1000, () => {
-        this.add.text(GAME_WIDTH / 2, panelY - 6, 'BASE DESTROYED', {
-          fontFamily: 'monospace',
-          fontSize: '8px',
-          color: '#cc4444',
-          shadow: TEXT_SHADOW,
-        }).setOrigin(0.5);
-      });
+      this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 + 22, 'BASE DESTROYED', {
+        fontFamily: UI_FONT,
+        fontSize: '9px',
+        color: '#888888',
+      }).setOrigin(0.5);
     }
 
     const rank = gd.score >= 100000 ? 'ACE' : gd.score >= 50000 ? 'VETERAN' : gd.score >= 20000 ? 'SOLDIER' : 'RECRUIT';
+    this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 + 28, rank, {
+      fontFamily: UI_FONT,
+      fontSize: '8px',
+      color: '#eeb850',
+    }).setOrigin(0.5);
 
-    this.time.delayedCall(1000, () => {
-      this.add.text(GAME_WIDTH / 2, panelY + 4, rank, {
-        fontFamily: 'monospace',
-        fontSize: '9px',
-        color: '#eeb850',
-        shadow: TEXT_SHADOW,
-      }).setOrigin(0.5);
+    this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 + 40, `SCORE  ${String(gd.score).padStart(6, '0')}`, {
+      fontFamily: UI_FONT,
+      fontSize: '10px',
+      color: '#ffffff',
+    }).setOrigin(0.5);
 
-      this.add.text(GAME_WIDTH / 2, panelY + 20, `SCORE  ${String(gd.score).padStart(6, '0')}`, {
-        fontFamily: 'monospace',
-        fontSize: '10px',
-        color: '#ffffff',
-        shadow: TEXT_SHADOW,
-      }).setOrigin(0.5);
+    this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 + 54, `HI     ${String(gd.highScore).padStart(6, '0')}`, {
+      fontFamily: UI_FONT,
+      fontSize: '10px',
+      color: newHigh ? '#eeb850' : '#888888',
+    }).setOrigin(0.5);
 
-      this.add.text(GAME_WIDTH / 2, panelY + 36, `HI     ${String(gd.highScore).padStart(6, '0')}`, {
-        fontFamily: 'monospace',
-        fontSize: '10px',
-        color: newHigh ? '#ffec80' : '#888888',
-        shadow: TEXT_SHADOW,
-      }).setOrigin(0.5);
-    });
-
-    const hint = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT - 20, 'PRESS ENTER', {
-      fontFamily: 'monospace',
-      fontSize: '9px',
+    const hint = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT - 24, 'PRESS ENTER', {
+      fontFamily: UI_FONT,
+      fontSize: '10px',
       color: '#eeb850',
       backgroundColor: '#1a1a1a',
       padding: { x: 8, y: 4 },

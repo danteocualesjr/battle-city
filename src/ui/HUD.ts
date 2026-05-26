@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import {
   COLORS,
   ENEMIES_PER_STAGE,
+  UI_FONT,
   PLAYFIELD_OFFSET_X,
   PLAYFIELD_OFFSET_Y,
   PLAYFIELD_SIZE,
@@ -47,7 +48,7 @@ export class HUD {
     // High score (top bar above playfield)
     this.highScoreText = scene.add
       .text(PLAYFIELD_OFFSET_X, PLAYFIELD_OFFSET_Y - 6, 'HI 20000', {
-        fontFamily: 'monospace',
+        fontFamily: UI_FONT,
         fontSize: '7px',
         color: '#eeb850',
         shadow: TEXT_SHADOW,
@@ -56,8 +57,8 @@ export class HUD {
       .setDepth(23);
 
     this.scoreText = scene.add
-      .text(PLAYFIELD_OFFSET_X + PLAYFIELD_SIZE, PLAYFIELD_OFFSET_Y - 6, '1P 000000', {
-        fontFamily: 'monospace',
+      .text(PLAYFIELD_OFFSET_X + PLAYFIELD_SIZE, PLAYFIELD_OFFSET_Y - 6, 'IP 000000', {
+        fontFamily: UI_FONT,
         fontSize: '7px',
         color: '#ffffff',
         shadow: TEXT_SHADOW,
@@ -66,8 +67,8 @@ export class HUD {
       .setDepth(23);
 
     scene.add
-      .text(sx + (SIDEBAR_WIDTH - 8) / 2, PLAYFIELD_OFFSET_Y + 4, 'ENEMY', {
-        fontFamily: 'monospace',
+      .text(sx + 6, PLAYFIELD_OFFSET_Y + 4, 'REST', {
+        fontFamily: UI_FONT,
         fontSize: '6px',
         color: '#e0e0e0',
         shadow: TEXT_SHADOW,
@@ -101,18 +102,17 @@ export class HUD {
     // Lives label
     const livesY = iconStartY + 10 * 10 + 10;
     scene.add
-      .text(sx + 6, livesY, '1P', {
-        fontFamily: 'monospace',
-        fontSize: '7px',
-        color: '#e0e0e0',
-        shadow: TEXT_SHADOW,
+      .text(sx + 6, livesY, 'IP', {
+        fontFamily: UI_FONT,
+        fontSize: '8px',
+        color: '#ffffff',
       })
       .setDepth(23);
     scene.add.image(sx + 6, livesY + 11, 'life-icon').setOrigin(0).setDepth(23);
     this.livesValue = scene.add
-      .text(sx + 22, livesY + 12, '3', {
-        fontFamily: 'monospace',
-        fontSize: '11px',
+      .text(sx + 22, livesY + 13, '3', {
+        fontFamily: UI_FONT,
+        fontSize: '10px',
         color: '#ffffff',
         shadow: TEXT_SHADOW,
       })
@@ -130,9 +130,9 @@ export class HUD {
     this.flagBody = scene.add.graphics().setDepth(23);
     this.drawFlag(sx + 6, flagY + 6);
     this.stageText = scene.add
-      .text(sx + 22, flagY + 14, '1', {
-        fontFamily: 'monospace',
-        fontSize: '13px',
+      .text(sx + 22, flagY + 8, '1', {
+        fontFamily: UI_FONT,
+        fontSize: '12px',
         color: '#ffffff',
         shadow: TEXT_SHADOW,
       })
@@ -140,8 +140,8 @@ export class HUD {
 
     // Star tier
     this.starText = scene.add
-      .text(sx + 6, flagY + 30, '★0', {
-        fontFamily: 'monospace',
+      .text(sx + 6, flagY + 26, '★0', {
+        fontFamily: UI_FONT,
         fontSize: '9px',
         color: '#ffd040',
         shadow: { offsetX: 0, offsetY: 0, color: '#806000', blur: 2, fill: true },
