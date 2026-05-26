@@ -121,6 +121,8 @@ export class HUD {
 
   private drawFlag(x: number, y: number): void {
     const g = this.flagBody;
+    g.fillStyle(0x4a4a4a, 1);
+    g.fillRect(x, y + 14, 6, 2);
     // pole
     g.fillStyle(0xffffff, 1);
     g.fillRect(x + 2, y, 1, 16);
