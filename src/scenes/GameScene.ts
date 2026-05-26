@@ -73,6 +73,7 @@ export class GameScene extends Phaser.Scene {
     // Playfield frame: dark border + black inner area
     this.add.rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, COLORS.background).setOrigin(0).setDepth(0);
     this.add.rectangle(PLAYFIELD_OFFSET_X, PLAYFIELD_OFFSET_Y, PLAYFIELD_SIZE, PLAYFIELD_SIZE, COLORS.playfield).setOrigin(0).setDepth(0.5);
+    this.add.rectangle(PLAYFIELD_OFFSET_X + 1, PLAYFIELD_OFFSET_Y + 1, PLAYFIELD_SIZE - 2, PLAYFIELD_SIZE - 2, 0x1a1a1a, 0).setOrigin(0).setDepth(0.6).setStrokeStyle(1, 0x333333);
 
     // Playfield container (everything inside the play area)
     this.playfield = this.add.container(PLAYFIELD_OFFSET_X, PLAYFIELD_OFFSET_Y).setDepth(8);
