@@ -1,12 +1,14 @@
 import Phaser from 'phaser';
 import {
   COLORS,
+  colorHex,
   ENEMIES_PER_STAGE,
   PLAYFIELD_OFFSET_X,
   PLAYFIELD_OFFSET_Y,
   PLAYFIELD_SIZE,
   SIDEBAR_WIDTH,
 } from '../config/constants';
+import { uiText } from './textStyle';
 
 export class HUD {
   private enemyIcons: Phaser.GameObjects.Image[] = [];
@@ -23,7 +25,6 @@ export class HUD {
   constructor(scene: Phaser.Scene) {
     const sx = PLAYFIELD_OFFSET_X + PLAYFIELD_SIZE + 8;
 
-    // Sidebar plate
     this.bg = scene.add
       .rectangle(sx, PLAYFIELD_OFFSET_Y, SIDEBAR_WIDTH - 8, PLAYFIELD_SIZE, COLORS.sidebar)
       .setOrigin(0)
@@ -39,36 +40,24 @@ export class HUD {
     this.sidebarBorder.lineStyle(1, 0x3a3a3a, 1);
     this.sidebarBorder.strokeRect(sx + 1, PLAYFIELD_OFFSET_Y + 1, SIDEBAR_WIDTH - 10, PLAYFIELD_SIZE - 2);
 
-    // High score (top)
     this.highScoreText = scene.add
-      .text(PLAYFIELD_OFFSET_X, PLAYFIELD_OFFSET_Y - 6, 'HI 20000', {
-        fontFamily: 'monospace',
-        fontSize: '7px',
-        color: '#ffffff',
+      .text(PLAYFIELD_OFFSET_X, PLAYFIELD_OFFSET_Y - 6, 'HI 20000', uiText('6px', '#ffffff', {
         shadow: { offsetX: 1, offsetY: 1, color: '#000000', blur: 0, fill: true },
-      })
+      }))
       .setOrigin(0, 1)
       .setDepth(23);
 
     this.scoreText = scene.add
-      .text(PLAYFIELD_OFFSET_X + PLAYFIELD_SIZE, PLAYFIELD_OFFSET_Y - 6, 'IP 000000', {
-        fontFamily: 'monospace',
-        fontSize: '7px',
-        color: '#ffffff',
+      .text(PLAYFIELD_OFFSET_X + PLAYFIELD_SIZE, PLAYFIELD_OFFSET_Y - 6, 'IP 000000', uiText('6px', '#ffffff', {
         shadow: { offsetX: 1, offsetY: 1, color: '#000000', blur: 0, fill: true },
-      })
+      }))
       .setOrigin(1, 1)
       .setDepth(23);
 
     scene.add
-      .text(sx + 6, PLAYFIELD_OFFSET_Y + 4, 'REST', {
-        fontFamily: 'monospace',
-        fontSize: '6px',
-        color: '#cccccc',
-      })
+      .text(sx + 6, PLAYFIELD_OFFSET_Y + 4, 'REST', uiText('5px', '#cccccc'))
       .setDepth(23);
 
-    // Enemy reserve grid: 2 columns × 10 rows of mini tank icons
     const iconStartX = sx + 8;
     const iconStartY = PLAYFIELD_OFFSET_Y + 12;
     for (let i = 0; i < ENEMIES_PER_STAGE; i++) {
@@ -87,44 +76,26 @@ export class HUD {
       .setOrigin(0)
       .setDepth(22);
 
-    // Lives label
     const livesY = iconStartY + 10 * 10 + 8;
     scene.add
-      .text(sx + 6, livesY, 'IP', {
-        fontFamily: 'monospace',
-        fontSize: '8px',
-        color: '#ffffff',
-      })
+      .text(sx + 6, livesY, '1P', uiText('6px', '#ffffff'))
       .setDepth(23);
     scene.add.image(sx + 6, livesY + 12, 'life-icon').setOrigin(0).setDepth(23);
     this.livesValue = scene.add
-      .text(sx + 22, livesY + 13, '3', {
-        fontFamily: 'monospace',
-        fontSize: '10px',
-        color: '#ffffff',
-      })
+      .text(sx + 22, livesY + 13, '3', uiText('8px', '#ffffff'))
       .setDepth(23);
 
-    // Stage flag
     const flagY = livesY + 30;
     this.flagBody = scene.add.graphics().setDepth(23);
     this.drawFlag(sx + 6, flagY);
     this.stageText = scene.add
-      .text(sx + 22, flagY + 8, '1', {
-        fontFamily: 'monospace',
-        fontSize: '12px',
-        color: '#ffffff',
-      })
+      .text(sx + 22, flagY + 8, '1', uiText('10px', '#ffffff'))
       .setDepth(23);
 
-    // Star tier
     this.starText = scene.add
-      .text(sx + 6, flagY + 26, '★0', {
-        fontFamily: 'monospace',
-        fontSize: '9px',
-        color: '#ffd040',
+      .text(sx + 6, flagY + 26, '★0', uiText('7px', colorHex(COLORS.hudStar), {
         shadow: { offsetX: 0, offsetY: 0, color: '#806000', blur: 2, fill: true },
-      })
+      }))
       .setDepth(23);
   }
 
@@ -132,10 +103,8 @@ export class HUD {
     const g = this.flagBody;
     g.fillStyle(0x4a4a4a, 1);
     g.fillRect(x, y + 14, 6, 2);
-    // pole
     g.fillStyle(0xffffff, 1);
     g.fillRect(x + 2, y, 1, 16);
-    // flag (red triangle pennant)
     g.fillStyle(COLORS.hudFlag, 1);
     g.fillTriangle(x + 3, y + 1, x + 14, y + 4, x + 3, y + 8);
   }
@@ -149,9 +118,9 @@ export class HUD {
     this.stageText.setText(String(stage));
     this.scoreText.setText(`IP ${String(score).padStart(6, '0')}`);
     this.highScoreText.setText(`HI ${String(highScore).padStart(5, '0')}`);
-    this.highScoreText.setColor(score >= highScore && score > 0 ? '#eeb850' : '#ffffff');
+    this.highScoreText.setColor(score >= highScore && score > 0 ? colorHex(COLORS.uiAccent) : '#ffffff');
     this.starText.setText(`★${starLevel}`);
-    this.starText.setColor(starLevel > 0 ? '#ffec80' : '#ffd040');
+    this.starText.setColor(starLevel > 0 ? '#ffec80' : colorHex(COLORS.hudStar));
   }
 
   destroy(): void {

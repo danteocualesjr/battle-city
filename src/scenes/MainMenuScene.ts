@@ -1,7 +1,8 @@
 import Phaser from 'phaser';
-import { COLORS, GAME_HEIGHT, GAME_WIDTH } from '../config/constants';
+import { COLORS, colorHex, GAME_HEIGHT, GAME_WIDTH } from '../config/constants';
 import { createDefaultRegistry, loadHighScore } from '../config/GameRegistry';
 import { generateAllSprites } from '../render/Sprites';
+import { uiText } from '../ui/textStyle';
 
 const TITLE_LETTERS: Record<string, string[]> = {
   B: [
@@ -79,17 +80,11 @@ export class MainMenuScene extends Phaser.Scene {
     const data = createDefaultRegistry();
     data.highScore = loadHighScore();
 
-    // Top scores bar
-    this.add.text(20, 12, 'I-      00', {
-      fontFamily: 'monospace',
-      fontSize: '10px',
-      color: '#ffffff',
-    });
-    this.add.text(GAME_WIDTH - 20, 12, `HI- ${String(data.highScore).padStart(6, '0')}`, {
-      fontFamily: 'monospace',
-      fontSize: '10px',
-      color: '#ffffff',
-    }).setOrigin(1, 0);
+    this.drawBackgroundGrid();
+    this.spawnTankParade();
+
+    this.add.text(20, 12, '1P      00', uiText('8px', '#ffffff'));
+    this.add.text(GAME_WIDTH - 20, 12, `HI ${String(data.highScore).padStart(6, '0')}`, uiText('8px', '#ffffff')).setOrigin(1, 0);
 
     const frame = this.add.graphics();
     frame.lineStyle(2, COLORS.uiAccent, 0.5);
@@ -97,38 +92,23 @@ export class MainMenuScene extends Phaser.Scene {
     frame.lineStyle(1, 0xffffff, 0.15);
     frame.strokeRect(14, 34, GAME_WIDTH - 28, GAME_HEIGHT - 68);
 
-    this.add.text(GAME_WIDTH - 14, 22, 'v1.0', {
-      fontFamily: 'monospace',
-      fontSize: '6px',
-      color: '#666666',
-    }).setOrigin(1, 0);
+    this.add.text(GAME_WIDTH - 14, 22, 'v1.0', uiText('6px', colorHex(COLORS.uiMuted))).setOrigin(1, 0);
 
     this.drawTitle();
 
     const startY = 150;
     this.options.forEach((opt, i) => {
-      const t = this.add.text(GAME_WIDTH / 2 + 6, startY + i * 18, opt, {
-        fontFamily: 'monospace',
-        fontSize: '11px',
-        color: '#ffffff',
-      }).setOrigin(0, 0.5);
+      const t = this.add.text(GAME_WIDTH / 2 + 6, startY + i * 18, opt, uiText('9px', '#ffffff')).setOrigin(0, 0.5);
       this.labels.push(t);
     });
 
     this.cursor = this.add.image(GAME_WIDTH / 2 - 40, startY, 'tank-p1-right').setOrigin(0, 0.5);
     this.tweens.add({ targets: this.cursor, x: '+=3', duration: 350, yoyo: true, repeat: -1 });
 
-    this.add.text(GAME_WIDTH / 2, GAME_HEIGHT - 28, '↑ ↓  SELECT     ENTER  CONFIRM', {
-      fontFamily: 'monospace',
-      fontSize: '7px',
-      color: '#999999',
-    }).setOrigin(0.5);
+    const hint = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT - 28, 'SELECT  ENTER', uiText('7px', colorHex(COLORS.uiMuted))).setOrigin(0.5);
+    this.tweens.add({ targets: hint, alpha: { from: 1, to: 0.4 }, duration: 700, yoyo: true, repeat: -1 });
 
-    this.add.text(GAME_WIDTH / 2, GAME_HEIGHT - 14, 'fan tribute · NAMCO 1985', {
-      fontFamily: 'monospace',
-      fontSize: '7px',
-      color: '#777777',
-    }).setOrigin(0.5);
+    this.add.text(GAME_WIDTH / 2, GAME_HEIGHT - 14, 'FAN TRIBUTE · 1985', uiText('6px', '#555555')).setOrigin(0.5);
 
     this.input.keyboard?.on('keydown-UP', () => this.moveCursor(-1));
     this.input.keyboard?.on('keydown-DOWN', () => this.moveCursor(1));
@@ -138,6 +118,25 @@ export class MainMenuScene extends Phaser.Scene {
     this.input.keyboard?.on('keydown-SPACE', () => this.confirm());
 
     this.cameras.main.fadeIn(450);
+  }
+
+  private drawBackgroundGrid(): void {
+    const g = this.add.graphics().setDepth(0);
+    g.lineStyle(1, 0xffffff, 0.035);
+    for (let x = 0; x <= GAME_WIDTH; x += 16) g.lineBetween(x, 0, x, GAME_HEIGHT);
+    for (let y = 0; y <= GAME_HEIGHT; y += 16) g.lineBetween(0, y, GAME_WIDTH, y);
+  }
+
+  private spawnTankParade(): void {
+    const textures = ['tank-p1-right', 'tank-e-basic-right', 'tank-e-fast-right'];
+    const tank = this.add.image(-24, GAME_HEIGHT - 52, textures[0]!).setOrigin(0, 0.5).setAlpha(0.28).setDepth(1);
+    this.tweens.add({
+      targets: tank,
+      x: GAME_WIDTH + 24,
+      duration: 14_000,
+      repeat: -1,
+      onRepeat: () => tank.setTexture(textures[Phaser.Math.Between(0, textures.length - 1)]!),
+    });
   }
 
   private drawTitle(): void {
@@ -175,7 +174,6 @@ export class MainMenuScene extends Phaser.Scene {
       const row = pattern[r]!;
       for (let c = 0; c < row.length; c++) {
         if (row[c] === '#') {
-          // brick fill with highlight
           g.fillStyle(COLORS.titleBrickLight, 1);
           g.fillRect(x + c * cs, y + r * cs, cs, cs);
           g.fillStyle(COLORS.titleBrick, 1);
@@ -191,7 +189,7 @@ export class MainMenuScene extends Phaser.Scene {
     this.selected = Phaser.Math.Wrap(this.selected + dir, 0, this.options.length);
     this.cursor.y = 150 + this.selected * 18;
     this.labels.forEach((l, i) => {
-      l.setColor(i === this.selected ? '#eeb850' : '#ffffff');
+      l.setColor(i === this.selected ? colorHex(COLORS.uiAccent) : '#ffffff');
       l.setScale(i === this.selected ? 1.05 : 1);
     });
   }
@@ -211,11 +209,7 @@ export class MainMenuScene extends Phaser.Scene {
   }
 
   private showSoon(msg: string): void {
-    const t = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT - 50, msg, {
-      fontFamily: 'monospace',
-      fontSize: '8px',
-      color: '#eeb850',
-    }).setOrigin(0.5);
+    const t = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT - 50, msg, uiText('7px', colorHex(COLORS.uiAccent))).setOrigin(0.5);
     this.time.delayedCall(1500, () => t.destroy());
   }
 }
