@@ -144,6 +144,7 @@ export class GameScene extends Phaser.Scene {
     frame.lineStyle(2, COLORS.uiAccent, 0.8);
     frame.strokeRect(GAME_WIDTH / 2 - 70, GAME_HEIGHT / 2 - 36, 140, 72);
     this.pauseOverlay.add([bg, frame, txt, hint]);
+    this.tweens.add({ targets: txt, alpha: { from: 1, to: 0.45 }, duration: 600, yoyo: true, repeat: -1 });
   }
 
   update(_time: number, delta: number): void {
