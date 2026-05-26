@@ -71,6 +71,12 @@ export class HUD {
       this.enemyIcons.push(icon);
     }
 
+    const dividerY = iconStartY + 10 * 10 + 4;
+    scene.add
+      .rectangle(sx + 4, dividerY, SIDEBAR_WIDTH - 16, 1, 0x5a5a5a)
+      .setOrigin(0)
+      .setDepth(22);
+
     // Lives label
     const livesY = iconStartY + 10 * 10 + 8;
     scene.add
