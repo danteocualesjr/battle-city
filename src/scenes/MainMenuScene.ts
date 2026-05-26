@@ -97,6 +97,12 @@ export class MainMenuScene extends Phaser.Scene {
     frame.lineStyle(1, 0xffffff, 0.15);
     frame.strokeRect(14, 34, GAME_WIDTH - 28, GAME_HEIGHT - 68);
 
+    this.add.text(GAME_WIDTH - 14, 22, 'v1.0', {
+      fontFamily: 'monospace',
+      fontSize: '6px',
+      color: '#666666',
+    }).setOrigin(1, 0);
+
     this.drawTitle();
 
     const startY = 150;
