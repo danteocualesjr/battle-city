@@ -140,7 +140,10 @@ export class GameScene extends Phaser.Scene {
       fontSize: '8px',
       color: '#ffffff',
     }).setOrigin(0.5);
-    this.pauseOverlay.add([bg, txt, hint]);
+    const frame = this.add.graphics();
+    frame.lineStyle(2, COLORS.uiAccent, 0.8);
+    frame.strokeRect(GAME_WIDTH / 2 - 70, GAME_HEIGHT / 2 - 36, 140, 72);
+    this.pauseOverlay.add([bg, frame, txt, hint]);
   }
 
   update(_time: number, delta: number): void {
