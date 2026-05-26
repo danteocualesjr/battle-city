@@ -75,6 +75,10 @@ export const COLORS = {
   hudText: 0xffffff,
   hudFlag: 0xe85020,
   hudStar: 0xffd040,
+  uiAccent: 0xeeb850,
+  uiMuted: 0x888888,
+  pauseOverlay: 0x000000,
+  pauseDim: 0.75,
 
   titleBrick: 0xc24a26,
   titleBrickLight: 0xe07050,
