@@ -123,6 +123,7 @@ export class HUD {
         fontFamily: 'monospace',
         fontSize: '9px',
         color: '#ffd040',
+        shadow: { offsetX: 0, offsetY: 0, color: '#806000', blur: 2, fill: true },
       })
       .setDepth(23);
   }
@@ -149,6 +150,7 @@ export class HUD {
     this.scoreText.setText(`IP ${String(score).padStart(6, '0')}`);
     this.highScoreText.setText(`HI ${String(highScore).padStart(5, '0')}`);
     this.starText.setText(`★${starLevel}`);
+    this.starText.setColor(starLevel > 0 ? '#ffec80' : '#ffd040');
   }
 
   destroy(): void {
