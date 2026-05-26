@@ -60,6 +60,14 @@ export class HUD {
       .setOrigin(1, 1)
       .setDepth(23);
 
+    scene.add
+      .text(sx + 6, PLAYFIELD_OFFSET_Y + 4, 'REST', {
+        fontFamily: 'monospace',
+        fontSize: '6px',
+        color: '#cccccc',
+      })
+      .setDepth(23);
+
     // Enemy reserve grid: 2 columns × 10 rows of mini tank icons
     const iconStartX = sx + 8;
     const iconStartY = PLAYFIELD_OFFSET_Y + 12;
