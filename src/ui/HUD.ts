@@ -149,6 +149,7 @@ export class HUD {
     this.stageText.setText(String(stage));
     this.scoreText.setText(`IP ${String(score).padStart(6, '0')}`);
     this.highScoreText.setText(`HI ${String(highScore).padStart(5, '0')}`);
+    this.highScoreText.setColor(score >= highScore && score > 0 ? '#eeb850' : '#ffffff');
     this.starText.setText(`★${starLevel}`);
     this.starText.setColor(starLevel > 0 ? '#ffec80' : '#ffd040');
   }
