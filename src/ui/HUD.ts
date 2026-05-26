@@ -18,6 +18,7 @@ export class HUD {
   private bg!: Phaser.GameObjects.Rectangle;
   private bgInner!: Phaser.GameObjects.Rectangle;
   private flagBody!: Phaser.GameObjects.Graphics;
+  private sidebarBorder!: Phaser.GameObjects.Graphics;
 
   constructor(scene: Phaser.Scene) {
     const sx = PLAYFIELD_OFFSET_X + PLAYFIELD_SIZE + 8;
@@ -31,6 +32,12 @@ export class HUD {
       .rectangle(sx + 2, PLAYFIELD_OFFSET_Y + 2, SIDEBAR_WIDTH - 12, PLAYFIELD_SIZE - 4, COLORS.sidebarShadow)
       .setOrigin(0)
       .setDepth(21);
+
+    this.sidebarBorder = scene.add.graphics().setDepth(22);
+    this.sidebarBorder.lineStyle(1, 0xffffff, 0.35);
+    this.sidebarBorder.strokeRect(sx, PLAYFIELD_OFFSET_Y, SIDEBAR_WIDTH - 8, PLAYFIELD_SIZE);
+    this.sidebarBorder.lineStyle(1, 0x3a3a3a, 1);
+    this.sidebarBorder.strokeRect(sx + 1, PLAYFIELD_OFFSET_Y + 1, SIDEBAR_WIDTH - 10, PLAYFIELD_SIZE - 2);
 
     // High score (top)
     this.highScoreText = scene.add
@@ -129,6 +136,7 @@ export class HUD {
   destroy(): void {
     this.bg.destroy();
     this.bgInner.destroy();
+    this.sidebarBorder.destroy();
     this.flagBody.destroy();
     this.enemyIcons.forEach((i) => i.destroy());
     this.livesValue.destroy();
