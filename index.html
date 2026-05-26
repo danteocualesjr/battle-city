@@ -13,8 +13,14 @@
     <title>Battle City</title>
     <style>
       * { margin: 0; padding: 0; box-sizing: border-box; }
+      @keyframes ambient-shift {
+        from { background: radial-gradient(ellipse at center, #1a1a1a 0%, #050505 70%); }
+        to { background: radial-gradient(ellipse at center, #1f1810 0%, #050505 70%); }
+      }
       html, body {
         width: 100%; height: 100%;
+        background: radial-gradient(ellipse at center, #1a1a1a 0%, #050505 70%);
+        animation: ambient-shift 12s ease-in-out infinite alternate;
         background: radial-gradient(ellipse at 50% 30%, #1e1a14 0%, #0a0806 55%, #030303 100%);
         overflow: hidden;
         font-family: 'Press Start 2P', monospace;

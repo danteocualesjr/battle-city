@@ -28,7 +28,8 @@ export class MainMenuScene extends Phaser.Scene {
   create(): void {
     this.cameras.main.setBackgroundColor(COLORS.background);
     generateAllSprites(this);
-    addStarfield(this);
+    this.drawBackgroundGrid();
+    this.spawnMenuTanks();
 
     const data = createDefaultRegistry();
     data.highScore = loadHighScore();
