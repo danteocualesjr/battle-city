@@ -22,6 +22,14 @@ export class GameOverScene extends Phaser.Scene {
     this.add.rectangle(0, 0, GAME_WIDTH, 28, COLORS.background, 0.9).setOrigin(0);
     this.add.rectangle(0, GAME_HEIGHT - 28, GAME_WIDTH, 28, COLORS.background, 0.9).setOrigin(0);
 
+    this.add.text(GAME_WIDTH / 2 + 2, GAME_HEIGHT + 42, 'GAME\nOVER', {
+      fontFamily: 'monospace',
+      fontSize: '28px',
+      color: '#000000',
+      align: 'center',
+      fontStyle: 'bold',
+    }).setOrigin(0.5);
+
     // GAME OVER rises into view (classic feel)
     const title = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT + 40, 'GAME\nOVER', {
       fontFamily: 'monospace',
