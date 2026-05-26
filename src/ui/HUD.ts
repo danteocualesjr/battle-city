@@ -45,6 +45,7 @@ export class HUD {
         fontFamily: 'monospace',
         fontSize: '7px',
         color: '#ffffff',
+        shadow: { offsetX: 1, offsetY: 1, color: '#000000', blur: 0, fill: true },
       })
       .setOrigin(0, 1)
       .setDepth(23);
@@ -54,6 +55,7 @@ export class HUD {
         fontFamily: 'monospace',
         fontSize: '7px',
         color: '#ffffff',
+        shadow: { offsetX: 1, offsetY: 1, color: '#000000', blur: 0, fill: true },
       })
       .setOrigin(1, 1)
       .setDepth(23);
