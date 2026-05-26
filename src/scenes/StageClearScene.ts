@@ -16,7 +16,7 @@ export class StageClearScene extends Phaser.Scene {
     }
 
     this.cameras.main.setBackgroundColor(0x000000);
-    this.cameras.main.fadeIn(250);
+    this.cameras.main.fadeIn(400);
 
     this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 36, `STAGE  ${gd.stage}`, {
       fontFamily: 'monospace',

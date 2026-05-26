@@ -137,7 +137,7 @@ export class MainMenuScene extends Phaser.Scene {
     this.input.keyboard?.on('keydown-ENTER', () => this.confirm());
     this.input.keyboard?.on('keydown-SPACE', () => this.confirm());
 
-    this.cameras.main.fadeIn(300);
+    this.cameras.main.fadeIn(450);
   }
 
   private drawTitle(): void {

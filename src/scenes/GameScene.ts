@@ -107,7 +107,7 @@ export class GameScene extends Phaser.Scene {
     this.buildStageIntro();
     this.lastEnemyCount = this.controller.enemies.length;
 
-    this.cameras.main.fadeIn(250);
+    this.cameras.main.fadeIn(400);
   }
 
   private buildStageIntro(): void {

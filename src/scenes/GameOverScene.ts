@@ -17,7 +17,7 @@ export class GameOverScene extends Phaser.Scene {
     }
 
     this.cameras.main.setBackgroundColor(0x000000);
-    this.cameras.main.fadeIn(300);
+    this.cameras.main.fadeIn(450);
 
     this.add.rectangle(0, 0, GAME_WIDTH, 28, COLORS.background, 0.9).setOrigin(0);
     this.add.rectangle(0, GAME_HEIGHT - 28, GAME_WIDTH, 28, COLORS.background, 0.9).setOrigin(0);
