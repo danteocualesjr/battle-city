@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { GAME_HEIGHT, GAME_WIDTH } from '../config/constants';
+import { COLORS, GAME_HEIGHT, GAME_WIDTH } from '../config/constants';
 import type { GameRegistryData } from '../config/GameRegistry';
 import { saveHighScore } from '../config/GameRegistry';
 
@@ -18,6 +18,9 @@ export class GameOverScene extends Phaser.Scene {
 
     this.cameras.main.setBackgroundColor(0x000000);
     this.cameras.main.fadeIn(300);
+
+    this.add.rectangle(0, 0, GAME_WIDTH, 28, COLORS.background, 0.9).setOrigin(0);
+    this.add.rectangle(0, GAME_HEIGHT - 28, GAME_WIDTH, 28, COLORS.background, 0.9).setOrigin(0);
 
     // GAME OVER rises into view (classic feel)
     const title = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT + 40, 'GAME\nOVER', {
