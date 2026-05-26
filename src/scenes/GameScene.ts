@@ -112,12 +112,20 @@ export class GameScene extends Phaser.Scene {
   private buildStageIntro(): void {
     this.stageIntroOverlay = this.add.container(0, 0).setDepth(60);
     const bg = this.add.rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, 0x7d7d7d).setOrigin(0);
-    const txt = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2, `STAGE  ${this.gameData.stage}`, {
+    const label = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 10, 'STAGE', {
       fontFamily: 'monospace',
-      fontSize: '16px',
-      color: '#000000',
+      fontSize: '10px',
+      color: '#333333',
     }).setOrigin(0.5);
+    const num = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 + 8, String(this.gameData.stage), {
+      fontFamily: 'monospace',
+      fontSize: '22px',
+      color: '#000000',
+      fontStyle: 'bold',
+    }).setOrigin(0.5);
+    const txt = this.add.container(0, 0, [label, num]);
     this.stageIntroOverlay.add([bg, txt]);
+    this.tweens.add({ targets: num, scale: { from: 1.2, to: 1 }, duration: 400, ease: 'Back.easeOut' });
     this.tweens.add({
       targets: this.stageIntroOverlay,
       alpha: 0,
