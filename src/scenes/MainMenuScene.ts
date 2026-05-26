@@ -121,13 +121,13 @@ export class MainMenuScene extends Phaser.Scene {
     this.add.text(GAME_WIDTH / 2, GAME_HEIGHT - 28, '↑ ↓  SELECT     ENTER  CONFIRM', {
       fontFamily: 'monospace',
       fontSize: '7px',
-      color: '#888888',
+      color: '#999999',
     }).setOrigin(0.5);
 
     this.add.text(GAME_WIDTH / 2, GAME_HEIGHT - 14, 'fan tribute · NAMCO 1985', {
       fontFamily: 'monospace',
       fontSize: '7px',
-      color: '#666666',
+      color: '#777777',
     }).setOrigin(0.5);
 
     this.input.keyboard?.on('keydown-UP', () => this.moveCursor(-1));
