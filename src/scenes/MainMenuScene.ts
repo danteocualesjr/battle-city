@@ -1,8 +1,8 @@
 import Phaser from 'phaser';
-import { COLORS, GAME_HEIGHT, GAME_WIDTH, UI_FONT } from '../config/constants';
+import { COLORS, colorHex, GAME_HEIGHT, GAME_WIDTH } from '../config/constants';
 import { createDefaultRegistry, loadHighScore } from '../config/GameRegistry';
 import { generateAllSprites } from '../render/Sprites';
-import { addStarfield, drawCornerFrame, TEXT_SHADOW } from '../ui/UiHelpers';
+import { uiText } from '../ui/textStyle';
 
 const TITLE_LETTERS: Record<string, string[]> = {
   B: ['#####.', '#....#', '#####.', '#....#', '#####.'],
@@ -34,62 +34,35 @@ export class MainMenuScene extends Phaser.Scene {
     const data = createDefaultRegistry();
     data.highScore = loadHighScore();
 
-    this.add.text(20, 12, 'I-      00', {
-      fontFamily: UI_FONT,
-      fontSize: '8px',
-      color: '#ffffff',
-    });
-    this.add.text(GAME_WIDTH - 20, 12, `HI- ${String(data.highScore).padStart(6, '0')}`, {
-      fontFamily: UI_FONT,
-      fontSize: '8px',
-      color: '#ffffff',
-    }).setOrigin(1, 0);
+    this.drawBackgroundGrid();
+    this.spawnTankParade();
+
+    this.add.text(20, 12, '1P      00', uiText('8px', '#ffffff'));
+    this.add.text(GAME_WIDTH - 20, 12, `HI ${String(data.highScore).padStart(6, '0')}`, uiText('8px', '#ffffff')).setOrigin(1, 0);
 
     const frame = this.add.graphics();
     frame.lineStyle(1, 0xffffff, 0.12);
     frame.strokeRect(12, 32, GAME_WIDTH - 24, GAME_HEIGHT - 64);
     drawCornerFrame(frame, 12, 32, GAME_WIDTH - 24, GAME_HEIGHT - 64, COLORS.uiAccent, 0.55, 14);
 
-    this.add.text(GAME_WIDTH - 14, 22, 'v1.0', {
-      fontFamily: UI_FONT,
-      fontSize: '6px',
-      color: '#555555',
-    }).setOrigin(1, 0);
+    this.add.text(GAME_WIDTH - 14, 22, 'v1.0', uiText('6px', colorHex(COLORS.uiMuted))).setOrigin(1, 0);
 
     this.drawTitle();
     this.addDecorTanks();
 
     const startY = 152;
     this.options.forEach((opt, i) => {
-      const t = this.add.text(GAME_WIDTH / 2 + 6, startY + i * 18, opt, {
-        fontFamily: UI_FONT,
-        fontSize: '8px',
-        color: '#ffffff',
-      }).setOrigin(0, 0.5);
+      const t = this.add.text(GAME_WIDTH / 2 + 6, startY + i * 18, opt, uiText('9px', '#ffffff')).setOrigin(0, 0.5);
       this.labels.push(t);
     });
 
     this.cursor = this.add.image(GAME_WIDTH / 2 - 72, startY, 'tank-p1-right').setOrigin(0, 0.5);
     this.tweens.add({ targets: this.cursor, x: '+=4', duration: 320, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
 
-    const pressStart = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT - 42, 'PRESS START', {
-      fontFamily: UI_FONT,
-      fontSize: '8px',
-      color: '#eeb850',
-    }).setOrigin(0.5);
-    this.tweens.add({ targets: pressStart, alpha: { from: 1, to: 0.25 }, duration: 700, yoyo: true, repeat: -1 });
+    const hint = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT - 28, 'SELECT  ENTER', uiText('7px', colorHex(COLORS.uiMuted))).setOrigin(0.5);
+    this.tweens.add({ targets: hint, alpha: { from: 1, to: 0.4 }, duration: 700, yoyo: true, repeat: -1 });
 
-    this.add.text(GAME_WIDTH / 2, GAME_HEIGHT - 28, '↑ ↓  SELECT     ENTER  CONFIRM', {
-      fontFamily: UI_FONT,
-      fontSize: '6px',
-      color: '#999999',
-    }).setOrigin(0.5);
-
-    this.add.text(GAME_WIDTH / 2, GAME_HEIGHT - 14, 'fan tribute · NAMCO 1985', {
-      fontFamily: UI_FONT,
-      fontSize: '6px',
-      color: '#777777',
-    }).setOrigin(0.5);
+    this.add.text(GAME_WIDTH / 2, GAME_HEIGHT - 14, 'FAN TRIBUTE · 1985', uiText('6px', '#555555')).setOrigin(0.5);
 
     this.refreshMenuLabels();
 
@@ -104,31 +77,21 @@ export class MainMenuScene extends Phaser.Scene {
   }
 
   private drawBackgroundGrid(): void {
-    const g = this.add.graphics().setDepth(1).setAlpha(0.12);
-    g.lineStyle(1, COLORS.uiAccent, 1);
-    for (let x = 0; x < GAME_WIDTH; x += 16) {
-      g.lineBetween(x, 32, x, GAME_HEIGHT - 32);
-    }
-    for (let y = 32; y < GAME_HEIGHT - 32; y += 16) {
-      g.lineBetween(12, y, GAME_WIDTH - 12, y);
-    }
+    const g = this.add.graphics().setDepth(0);
+    g.lineStyle(1, 0xffffff, 0.035);
+    for (let x = 0; x <= GAME_WIDTH; x += 16) g.lineBetween(x, 0, x, GAME_HEIGHT);
+    for (let y = 0; y <= GAME_HEIGHT; y += 16) g.lineBetween(0, y, GAME_WIDTH, y);
   }
 
-  private spawnMenuTanks(): void {
-    const tanks = [
-      { key: 'tank-e-basic-right', y: 118, dir: 1 },
-      { key: 'tank-p1-right', y: 132, dir: 1 },
-      { key: 'tank-e-fast-left', y: 146, dir: -1 },
-    ];
-    tanks.forEach(({ key, y, dir }) => {
-      const t = this.add.image(dir > 0 ? -20 : GAME_WIDTH + 20, y, key).setDepth(2).setAlpha(0.35);
-      this.tweens.add({
-        targets: t,
-        x: dir > 0 ? GAME_WIDTH + 20 : -20,
-        duration: 8000 + Math.random() * 4000,
-        repeat: -1,
-        ease: 'Linear',
-      });
+  private spawnTankParade(): void {
+    const textures = ['tank-p1-right', 'tank-e-basic-right', 'tank-e-fast-right'];
+    const tank = this.add.image(-24, GAME_HEIGHT - 52, textures[0]!).setOrigin(0, 0.5).setAlpha(0.28).setDepth(1);
+    this.tweens.add({
+      targets: tank,
+      x: GAME_WIDTH + 24,
+      duration: 14_000,
+      repeat: -1,
+      onRepeat: () => tank.setTexture(textures[Phaser.Math.Between(0, textures.length - 1)]!),
     });
   }
 
@@ -186,10 +149,8 @@ export class MainMenuScene extends Phaser.Scene {
 
   private refreshMenuLabels(): void {
     this.labels.forEach((l, i) => {
-      const on = i === this.selected;
-      l.setColor(on ? '#eeb850' : '#888888');
-      l.setScale(on ? 1.08 : 1);
-      l.setText(on ? `▶ ${this.options[i]} ◀` : this.options[i]!);
+      l.setColor(i === this.selected ? colorHex(COLORS.uiAccent) : '#ffffff');
+      l.setScale(i === this.selected ? 1.05 : 1);
     });
   }
 
@@ -208,13 +169,7 @@ export class MainMenuScene extends Phaser.Scene {
   }
 
   private showSoon(msg: string): void {
-    const t = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT - 50, msg, {
-      fontFamily: UI_FONT,
-      fontSize: '7px',
-      color: '#eeb850',
-      backgroundColor: '#1a1a1a',
-      padding: { x: 6, y: 4 },
-    }).setOrigin(0.5);
+    const t = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT - 50, msg, uiText('7px', colorHex(COLORS.uiAccent))).setOrigin(0.5);
     this.time.delayedCall(1500, () => t.destroy());
   }
 }

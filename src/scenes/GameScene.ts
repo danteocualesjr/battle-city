@@ -16,7 +16,7 @@ import { GameController } from '../game/GameController';
 import { LEVELS } from '../map/levels';
 import { TileMap } from '../map/TileMap';
 import { HUD } from '../ui/HUD';
-import { drawCornerFrame, TEXT_SHADOW } from '../ui/UiHelpers';
+import { uiText } from '../ui/textStyle';
 import { generateAllSprites } from '../render/Sprites';
 import type { EnemyState } from '../entities/types';
 
@@ -120,17 +120,9 @@ export class GameScene extends Phaser.Scene {
   private buildStageIntro(): void {
     this.stageIntroOverlay = this.add.container(0, 0).setDepth(60);
     const bg = this.add.rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, 0x7d7d7d).setOrigin(0);
-    const label = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 10, 'STAGE', {
-      fontFamily: UI_FONT,
-      fontSize: '8px',
-      color: '#333333',
-    }).setOrigin(0.5);
-    const num = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 + 8, String(this.gameData.stage), {
-      fontFamily: UI_FONT,
-      fontSize: '16px',
-      color: '#000000',
-    }).setOrigin(0.5);
-    const txt = this.add.container(0, 0, [stripes, label, numShadow, num]);
+    const label = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 10, 'STAGE', uiText('8px', '#333333')).setOrigin(0.5);
+    const num = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 + 8, String(this.gameData.stage), uiText('16px', '#000000')).setOrigin(0.5);
+    const txt = this.add.container(0, 0, [label, num]);
     this.stageIntroOverlay.add([bg, txt]);
     this.tweens.add({ targets: [num, numShadow], scale: { from: 1.35, to: 1 }, duration: 450, ease: 'Back.easeOut' });
     this.tweens.add({
@@ -145,21 +137,12 @@ export class GameScene extends Phaser.Scene {
   private buildPauseOverlay(): void {
     this.pauseOverlay = this.add.container(0, 0).setDepth(50).setVisible(false);
     const bg = this.add.rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, COLORS.pauseOverlay, COLORS.pauseDim).setOrigin(0);
-    const panel = this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, 136, 68, 0x1a1a1a, 0.92).setOrigin(0.5);
-    const txt = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 14, 'PAUSE', {
-      fontFamily: UI_FONT,
-      fontSize: '12px',
-      color: '#e85020',
-      shadow: TEXT_SHADOW,
-    }).setOrigin(0.5);
-    const hint = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 + 14, 'ESC resume · R restart · Q quit', {
-      fontFamily: UI_FONT,
-      fontSize: '6px',
-      color: '#ffffff',
-    }).setOrigin(0.5);
+    const panel = this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, 148, 80, 0x141414, 0.95).setOrigin(0.5);
+    const txt = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 14, 'PAUSE', uiText('14px', '#e85020')).setOrigin(0.5);
+    const hint = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 + 14, 'ESC · R · Q', uiText('6px', '#cccccc')).setOrigin(0.5);
     const frame = this.add.graphics();
     frame.lineStyle(2, COLORS.uiAccent, 0.8);
-    frame.strokeRect(GAME_WIDTH / 2 - 70, GAME_HEIGHT / 2 - 36, 140, 72);
+    frame.strokeRect(GAME_WIDTH / 2 - 74, GAME_HEIGHT / 2 - 40, 148, 80);
     this.pauseOverlay.add([bg, panel, frame, txt, hint]);
     this.tweens.add({ targets: txt, alpha: { from: 1, to: 0.45 }, duration: 600, yoyo: true, repeat: -1 });
     this.tweens.add({ targets: icon, y: '-=2', duration: 500, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });

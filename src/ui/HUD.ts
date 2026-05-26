@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import {
   COLORS,
+  colorHex,
   ENEMIES_PER_STAGE,
   UI_FONT,
   PLAYFIELD_OFFSET_X,
@@ -8,7 +9,7 @@ import {
   PLAYFIELD_SIZE,
   SIDEBAR_WIDTH,
 } from '../config/constants';
-import { drawCornerFrame, TEXT_SHADOW } from './UiHelpers';
+import { uiText } from './textStyle';
 
 export class HUD {
   private enemyIcons: Phaser.GameObjects.Image[] = [];
@@ -26,7 +27,6 @@ export class HUD {
   constructor(scene: Phaser.Scene) {
     const sx = PLAYFIELD_OFFSET_X + PLAYFIELD_SIZE + 8;
 
-    // Sidebar plate
     this.bg = scene.add
       .rectangle(sx, PLAYFIELD_OFFSET_Y, SIDEBAR_WIDTH - 8, PLAYFIELD_SIZE, COLORS.sidebar)
       .setOrigin(0)
@@ -42,41 +42,24 @@ export class HUD {
     this.sidebarBorder.lineStyle(1, 0x2a2a2a, 1);
     this.sidebarBorder.strokeRect(sx + 1, PLAYFIELD_OFFSET_Y + 1, SIDEBAR_WIDTH - 10, PLAYFIELD_SIZE - 2);
 
-    this.cornerFrame = scene.add.graphics().setDepth(22);
-    drawCornerFrame(this.cornerFrame, sx + 2, PLAYFIELD_OFFSET_Y + 2, SIDEBAR_WIDTH - 12, PLAYFIELD_SIZE - 4, 0xffffff, 0.25, 6);
-
-    // High score (top bar above playfield)
     this.highScoreText = scene.add
-      .text(PLAYFIELD_OFFSET_X, PLAYFIELD_OFFSET_Y - 6, 'HI 20000', {
-        fontFamily: UI_FONT,
-        fontSize: '7px',
-        color: '#eeb850',
-        shadow: TEXT_SHADOW,
-      })
+      .text(PLAYFIELD_OFFSET_X, PLAYFIELD_OFFSET_Y - 6, 'HI 20000', uiText('6px', '#ffffff', {
+        shadow: { offsetX: 1, offsetY: 1, color: '#000000', blur: 0, fill: true },
+      }))
       .setOrigin(0, 1)
       .setDepth(23);
 
     this.scoreText = scene.add
-      .text(PLAYFIELD_OFFSET_X + PLAYFIELD_SIZE, PLAYFIELD_OFFSET_Y - 6, 'IP 000000', {
-        fontFamily: UI_FONT,
-        fontSize: '7px',
-        color: '#ffffff',
-        shadow: TEXT_SHADOW,
-      })
+      .text(PLAYFIELD_OFFSET_X + PLAYFIELD_SIZE, PLAYFIELD_OFFSET_Y - 6, 'IP 000000', uiText('6px', '#ffffff', {
+        shadow: { offsetX: 1, offsetY: 1, color: '#000000', blur: 0, fill: true },
+      }))
       .setOrigin(1, 1)
       .setDepth(23);
 
     scene.add
-      .text(sx + 6, PLAYFIELD_OFFSET_Y + 4, 'REST', {
-        fontFamily: UI_FONT,
-        fontSize: '6px',
-        color: '#e0e0e0',
-        shadow: TEXT_SHADOW,
-      })
-      .setOrigin(0.5, 0)
+      .text(sx + 6, PLAYFIELD_OFFSET_Y + 4, 'REST', uiText('5px', '#cccccc'))
       .setDepth(23);
 
-    // Enemy reserve grid: 2 columns × 10 rows of mini tank icons
     const iconStartX = sx + 8;
     const iconStartY = PLAYFIELD_OFFSET_Y + 14;
     for (let i = 0; i < ENEMIES_PER_STAGE; i++) {
@@ -99,53 +82,26 @@ export class HUD {
       .setOrigin(0)
       .setDepth(22);
 
-    // Lives label
-    const livesY = iconStartY + 10 * 10 + 10;
+    const livesY = iconStartY + 10 * 10 + 8;
     scene.add
-      .text(sx + 6, livesY, 'IP', {
-        fontFamily: UI_FONT,
-        fontSize: '8px',
-        color: '#ffffff',
-      })
+      .text(sx + 6, livesY, '1P', uiText('6px', '#ffffff'))
       .setDepth(23);
     scene.add.image(sx + 6, livesY + 11, 'life-icon').setOrigin(0).setDepth(23);
     this.livesValue = scene.add
-      .text(sx + 22, livesY + 13, '3', {
-        fontFamily: UI_FONT,
-        fontSize: '10px',
-        color: '#ffffff',
-        shadow: TEXT_SHADOW,
-      })
+      .text(sx + 22, livesY + 13, '3', uiText('8px', '#ffffff'))
       .setDepth(23);
 
-    // Stage flag
-    const flagY = livesY + 32;
-    scene.add
-      .text(sx + 6, flagY - 2, 'STAGE', {
-        fontFamily: 'monospace',
-        fontSize: '6px',
-        color: '#cccccc',
-      })
-      .setDepth(23);
+    const flagY = livesY + 30;
     this.flagBody = scene.add.graphics().setDepth(23);
     this.drawFlag(sx + 6, flagY + 6);
     this.stageText = scene.add
-      .text(sx + 22, flagY + 8, '1', {
-        fontFamily: UI_FONT,
-        fontSize: '12px',
-        color: '#ffffff',
-        shadow: TEXT_SHADOW,
-      })
+      .text(sx + 22, flagY + 8, '1', uiText('10px', '#ffffff'))
       .setDepth(23);
 
-    // Star tier
     this.starText = scene.add
-      .text(sx + 6, flagY + 26, '★0', {
-        fontFamily: UI_FONT,
-        fontSize: '9px',
-        color: '#ffd040',
+      .text(sx + 6, flagY + 26, '★0', uiText('7px', colorHex(COLORS.hudStar), {
         shadow: { offsetX: 0, offsetY: 0, color: '#806000', blur: 2, fill: true },
-      })
+      }))
       .setDepth(23);
   }
 
@@ -169,9 +125,9 @@ export class HUD {
     this.stageText.setText(String(stage));
     this.scoreText.setText(`1P ${String(score).padStart(6, '0')}`);
     this.highScoreText.setText(`HI ${String(highScore).padStart(5, '0')}`);
-    this.highScoreText.setColor(score >= highScore && score > 0 ? '#ffec80' : '#eeb850');
+    this.highScoreText.setColor(score >= highScore && score > 0 ? colorHex(COLORS.uiAccent) : '#ffffff');
     this.starText.setText(`★${starLevel}`);
-    this.starText.setColor(starLevel > 0 ? '#ffec80' : '#ffd040');
+    this.starText.setColor(starLevel > 0 ? '#ffec80' : colorHex(COLORS.hudStar));
   }
 
   destroy(): void {

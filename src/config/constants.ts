@@ -31,6 +31,13 @@ export const POWERUP_POSITIONS = [
   { col: 3, row: 6 }, { col: 9, row: 6 }, { col: 6, row: 3 },
 ] as const;
 
+/** Arcade UI typography — matches Press Start 2P loaded in index.html */
+export const UI_FONT = '"Press Start 2P", monospace';
+
+export function colorHex(value: number): string {
+  return `#${value.toString(16).padStart(6, '0')}`;
+}
+
 export const COLORS = {
   background: 0x0a0a0a,
   playfield: 0x000000,
