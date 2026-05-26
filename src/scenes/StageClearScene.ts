@@ -20,8 +20,8 @@ export class StageClearScene extends Phaser.Scene {
 
     this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 36, `STAGE  ${gd.stage}`, {
       fontFamily: 'monospace',
-      fontSize: '12px',
-      color: '#aaaaaa',
+      fontSize: '14px',
+      color: '#cccccc',
     }).setOrigin(0.5);
 
     const clearTxt = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 12, 'CLEAR', {
