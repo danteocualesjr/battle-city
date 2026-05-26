@@ -19,9 +19,10 @@ export class GameOverScene extends Phaser.Scene {
 
     this.cameras.main.setBackgroundColor(0x000000);
     this.cameras.main.fadeIn(450);
+    addStarfield(this, 24);
 
-    this.add.rectangle(0, 0, GAME_WIDTH, 28, COLORS.background, 0.9).setOrigin(0);
-    this.add.rectangle(0, GAME_HEIGHT - 28, GAME_WIDTH, 28, COLORS.background, 0.9).setOrigin(0);
+    const frame = this.add.graphics();
+    drawCornerFrame(frame, 16, 16, GAME_WIDTH - 32, GAME_HEIGHT - 32, COLORS.uiAccent, 0.4, 12);
 
     this.add.text(GAME_WIDTH / 2 + 2, GAME_HEIGHT + 42, 'GAME\nOVER', uiText('16px', '#000000', { align: 'center' })).setOrigin(0.5);
 
@@ -29,10 +30,14 @@ export class GameOverScene extends Phaser.Scene {
 
     this.tweens.add({
       targets: title,
-      y: GAME_HEIGHT / 2 - 24,
+      y: GAME_HEIGHT / 2 - 30,
       duration: 1100,
       ease: 'Sine.easeOut',
     });
+
+    const panelY = GAME_HEIGHT / 2 + 8;
+    const panel = this.add.rectangle(GAME_WIDTH / 2, panelY + 20, 160, 72, 0x111111, 0.85).setOrigin(0.5).setAlpha(0);
+    this.tweens.add({ targets: panel, alpha: 1, delay: 900, duration: 300 });
 
     if (data.baseDestroyed) {
       this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 + 22, 'BASE DESTROYED', uiText('7px', colorHex(COLORS.uiMuted))).setOrigin(0.5);

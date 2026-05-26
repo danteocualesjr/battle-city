@@ -5,62 +5,14 @@ import { generateAllSprites } from '../render/Sprites';
 import { uiText } from '../ui/textStyle';
 
 const TITLE_LETTERS: Record<string, string[]> = {
-  B: [
-    '#####.',
-    '#....#',
-    '#####.',
-    '#....#',
-    '#####.',
-  ],
-  A: [
-    '.###..',
-    '#...#.',
-    '#####.',
-    '#...#.',
-    '#...#.',
-  ],
-  T: [
-    '#####.',
-    '..#...',
-    '..#...',
-    '..#...',
-    '..#...',
-  ],
-  L: [
-    '#.....',
-    '#.....',
-    '#.....',
-    '#.....',
-    '#####.',
-  ],
-  E: [
-    '#####.',
-    '#.....',
-    '###...',
-    '#.....',
-    '#####.',
-  ],
-  C: [
-    '.####.',
-    '#.....',
-    '#.....',
-    '#.....',
-    '.####.',
-  ],
-  I: [
-    '#####.',
-    '..#...',
-    '..#...',
-    '..#...',
-    '#####.',
-  ],
-  Y: [
-    '#...#.',
-    '.#.#..',
-    '..#...',
-    '..#...',
-    '..#...',
-  ],
+  B: ['#####.', '#....#', '#####.', '#....#', '#####.'],
+  A: ['.###..', '#...#.', '#####.', '#...#.', '#...#.'],
+  T: ['#####.', '..#...', '..#...', '..#...', '..#...'],
+  L: ['#.....', '#.....', '#.....', '#.....', '#####.'],
+  E: ['#####.', '#.....', '###...', '#.....', '#####.'],
+  C: ['.####.', '#.....', '#.....', '#.....', '.####.'],
+  I: ['#####.', '..#...', '..#...', '..#...', '#####.'],
+  Y: ['#...#.', '.#.#..', '..#...', '..#...', '..#...'],
 };
 
 export class MainMenuScene extends Phaser.Scene {
@@ -76,6 +28,7 @@ export class MainMenuScene extends Phaser.Scene {
   create(): void {
     this.cameras.main.setBackgroundColor(COLORS.background);
     generateAllSprites(this);
+    addStarfield(this);
 
     const data = createDefaultRegistry();
     data.highScore = loadHighScore();
@@ -87,28 +40,30 @@ export class MainMenuScene extends Phaser.Scene {
     this.add.text(GAME_WIDTH - 20, 12, `HI ${String(data.highScore).padStart(6, '0')}`, uiText('8px', '#ffffff')).setOrigin(1, 0);
 
     const frame = this.add.graphics();
-    frame.lineStyle(2, COLORS.uiAccent, 0.5);
+    frame.lineStyle(1, 0xffffff, 0.12);
     frame.strokeRect(12, 32, GAME_WIDTH - 24, GAME_HEIGHT - 64);
-    frame.lineStyle(1, 0xffffff, 0.15);
-    frame.strokeRect(14, 34, GAME_WIDTH - 28, GAME_HEIGHT - 68);
+    drawCornerFrame(frame, 12, 32, GAME_WIDTH - 24, GAME_HEIGHT - 64, COLORS.uiAccent, 0.55, 14);
 
     this.add.text(GAME_WIDTH - 14, 22, 'v1.0', uiText('6px', colorHex(COLORS.uiMuted))).setOrigin(1, 0);
 
     this.drawTitle();
+    this.addDecorTanks();
 
-    const startY = 150;
+    const startY = 152;
     this.options.forEach((opt, i) => {
       const t = this.add.text(GAME_WIDTH / 2 + 6, startY + i * 18, opt, uiText('9px', '#ffffff')).setOrigin(0, 0.5);
       this.labels.push(t);
     });
 
-    this.cursor = this.add.image(GAME_WIDTH / 2 - 40, startY, 'tank-p1-right').setOrigin(0, 0.5);
-    this.tweens.add({ targets: this.cursor, x: '+=3', duration: 350, yoyo: true, repeat: -1 });
+    this.cursor = this.add.image(GAME_WIDTH / 2 - 72, startY, 'tank-p1-right').setOrigin(0, 0.5);
+    this.tweens.add({ targets: this.cursor, x: '+=4', duration: 320, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
 
     const hint = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT - 28, 'SELECT  ENTER', uiText('7px', colorHex(COLORS.uiMuted))).setOrigin(0.5);
     this.tweens.add({ targets: hint, alpha: { from: 1, to: 0.4 }, duration: 700, yoyo: true, repeat: -1 });
 
     this.add.text(GAME_WIDTH / 2, GAME_HEIGHT - 14, 'FAN TRIBUTE · 1985', uiText('6px', '#555555')).setOrigin(0.5);
+
+    this.refreshMenuLabels();
 
     this.input.keyboard?.on('keydown-UP', () => this.moveCursor(-1));
     this.input.keyboard?.on('keydown-DOWN', () => this.moveCursor(1));
@@ -187,7 +142,11 @@ export class MainMenuScene extends Phaser.Scene {
 
   private moveCursor(dir: number): void {
     this.selected = Phaser.Math.Wrap(this.selected + dir, 0, this.options.length);
-    this.cursor.y = 150 + this.selected * 18;
+    this.cursor.y = 152 + this.selected * 20;
+    this.refreshMenuLabels();
+  }
+
+  private refreshMenuLabels(): void {
     this.labels.forEach((l, i) => {
       l.setColor(i === this.selected ? colorHex(COLORS.uiAccent) : '#ffffff');
       l.setScale(i === this.selected ? 1.05 : 1);

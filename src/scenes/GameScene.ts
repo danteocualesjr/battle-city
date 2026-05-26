@@ -74,7 +74,12 @@ export class GameScene extends Phaser.Scene {
     // Playfield frame: dark border + black inner area
     this.add.rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, COLORS.background).setOrigin(0).setDepth(0);
     this.add.rectangle(PLAYFIELD_OFFSET_X, PLAYFIELD_OFFSET_Y, PLAYFIELD_SIZE, PLAYFIELD_SIZE, COLORS.playfield).setOrigin(0).setDepth(0.5);
-    this.add.rectangle(PLAYFIELD_OFFSET_X + 1, PLAYFIELD_OFFSET_Y + 1, PLAYFIELD_SIZE - 2, PLAYFIELD_SIZE - 2, 0x1a1a1a, 0).setOrigin(0).setDepth(0.6).setStrokeStyle(1, 0x333333);
+    const pfFrame = this.add.graphics().setDepth(0.7);
+    pfFrame.lineStyle(2, COLORS.uiAccent, 0.35);
+    pfFrame.strokeRect(PLAYFIELD_OFFSET_X - 1, PLAYFIELD_OFFSET_Y - 1, PLAYFIELD_SIZE + 2, PLAYFIELD_SIZE + 2);
+    pfFrame.lineStyle(1, 0x444444, 1);
+    pfFrame.strokeRect(PLAYFIELD_OFFSET_X, PLAYFIELD_OFFSET_Y, PLAYFIELD_SIZE, PLAYFIELD_SIZE);
+    drawCornerFrame(pfFrame, PLAYFIELD_OFFSET_X, PLAYFIELD_OFFSET_Y, PLAYFIELD_SIZE, PLAYFIELD_SIZE, 0xffffff, 0.2, 8);
 
     // Playfield container (everything inside the play area)
     this.playfield = this.add.container(PLAYFIELD_OFFSET_X, PLAYFIELD_OFFSET_Y).setDepth(8);
@@ -118,12 +123,12 @@ export class GameScene extends Phaser.Scene {
     const num = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 + 8, String(this.gameData.stage), uiText('16px', '#000000')).setOrigin(0.5);
     const txt = this.add.container(0, 0, [label, num]);
     this.stageIntroOverlay.add([bg, txt]);
-    this.tweens.add({ targets: num, scale: { from: 1.2, to: 1 }, duration: 400, ease: 'Back.easeOut' });
+    this.tweens.add({ targets: [num, numShadow], scale: { from: 1.35, to: 1 }, duration: 450, ease: 'Back.easeOut' });
     this.tweens.add({
       targets: this.stageIntroOverlay,
       alpha: 0,
-      delay: 1500,
-      duration: 350,
+      delay: 1600,
+      duration: 400,
       onComplete: () => this.stageIntroOverlay.setVisible(false),
     });
   }
@@ -139,6 +144,7 @@ export class GameScene extends Phaser.Scene {
     frame.strokeRect(GAME_WIDTH / 2 - 74, GAME_HEIGHT / 2 - 40, 148, 80);
     this.pauseOverlay.add([bg, panel, frame, txt, hint]);
     this.tweens.add({ targets: txt, alpha: { from: 1, to: 0.45 }, duration: 600, yoyo: true, repeat: -1 });
+    this.tweens.add({ targets: icon, y: '-=2', duration: 500, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
   }
 
   update(_time: number, delta: number): void {
@@ -291,7 +297,6 @@ export class GameScene extends Phaser.Scene {
       const tex = b.direction === 'up' || b.direction === 'down' ? 'bullet-up' : 'bullet-h';
       s.setTexture(tex);
       s.setRotation(b.direction === 'down' ? Math.PI : b.direction === 'left' ? Math.PI : 0);
-      // For h direction we keep texture as is (it's symmetric)
       s.setPosition(b.x, b.y);
       s.setVisible(true);
       bi++;

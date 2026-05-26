@@ -21,6 +21,7 @@ export class HUD {
   private bgInner!: Phaser.GameObjects.Rectangle;
   private flagBody!: Phaser.GameObjects.Graphics;
   private sidebarBorder!: Phaser.GameObjects.Graphics;
+  private cornerFrame!: Phaser.GameObjects.Graphics;
 
   constructor(scene: Phaser.Scene) {
     const sx = PLAYFIELD_OFFSET_X + PLAYFIELD_SIZE + 8;
@@ -35,9 +36,9 @@ export class HUD {
       .setDepth(21);
 
     this.sidebarBorder = scene.add.graphics().setDepth(22);
-    this.sidebarBorder.lineStyle(1, 0xffffff, 0.35);
+    this.sidebarBorder.lineStyle(1, 0xffffff, 0.4);
     this.sidebarBorder.strokeRect(sx, PLAYFIELD_OFFSET_Y, SIDEBAR_WIDTH - 8, PLAYFIELD_SIZE);
-    this.sidebarBorder.lineStyle(1, 0x3a3a3a, 1);
+    this.sidebarBorder.lineStyle(1, 0x2a2a2a, 1);
     this.sidebarBorder.strokeRect(sx + 1, PLAYFIELD_OFFSET_Y + 1, SIDEBAR_WIDTH - 10, PLAYFIELD_SIZE - 2);
 
     this.highScoreText = scene.add
@@ -59,7 +60,7 @@ export class HUD {
       .setDepth(23);
 
     const iconStartX = sx + 8;
-    const iconStartY = PLAYFIELD_OFFSET_Y + 12;
+    const iconStartY = PLAYFIELD_OFFSET_Y + 14;
     for (let i = 0; i < ENEMIES_PER_STAGE; i++) {
       const col = i % 2;
       const row = Math.floor(i / 2);
@@ -72,7 +73,11 @@ export class HUD {
 
     const dividerY = iconStartY + 10 * 10 + 4;
     scene.add
-      .rectangle(sx + 4, dividerY, SIDEBAR_WIDTH - 16, 1, 0x5a5a5a)
+      .rectangle(sx + 4, dividerY, SIDEBAR_WIDTH - 16, 1, 0x707070)
+      .setOrigin(0)
+      .setDepth(22);
+    scene.add
+      .rectangle(sx + 4, dividerY + 1, SIDEBAR_WIDTH - 16, 1, 0x3a3a3a)
       .setOrigin(0)
       .setDepth(22);
 
@@ -80,14 +85,14 @@ export class HUD {
     scene.add
       .text(sx + 6, livesY, '1P', uiText('6px', '#ffffff'))
       .setDepth(23);
-    scene.add.image(sx + 6, livesY + 12, 'life-icon').setOrigin(0).setDepth(23);
+    scene.add.image(sx + 6, livesY + 11, 'life-icon').setOrigin(0).setDepth(23);
     this.livesValue = scene.add
       .text(sx + 22, livesY + 13, '3', uiText('8px', '#ffffff'))
       .setDepth(23);
 
     const flagY = livesY + 30;
     this.flagBody = scene.add.graphics().setDepth(23);
-    this.drawFlag(sx + 6, flagY);
+    this.drawFlag(sx + 6, flagY + 6);
     this.stageText = scene.add
       .text(sx + 22, flagY + 8, '1', uiText('10px', '#ffffff'))
       .setDepth(23);
@@ -113,10 +118,11 @@ export class HUD {
     const defeated = ENEMIES_PER_STAGE - enemiesRemaining;
     this.enemyIcons.forEach((icon, i) => {
       icon.setVisible(i >= defeated);
+      icon.setAlpha(i >= defeated ? 1 : 0.35);
     });
     this.livesValue.setText(String(lives));
     this.stageText.setText(String(stage));
-    this.scoreText.setText(`IP ${String(score).padStart(6, '0')}`);
+    this.scoreText.setText(`1P ${String(score).padStart(6, '0')}`);
     this.highScoreText.setText(`HI ${String(highScore).padStart(5, '0')}`);
     this.highScoreText.setColor(score >= highScore && score > 0 ? colorHex(COLORS.uiAccent) : '#ffffff');
     this.starText.setText(`★${starLevel}`);
@@ -127,6 +133,7 @@ export class HUD {
     this.bg.destroy();
     this.bgInner.destroy();
     this.sidebarBorder.destroy();
+    this.cornerFrame.destroy();
     this.flagBody.destroy();
     this.enemyIcons.forEach((i) => i.destroy());
     this.livesValue.destroy();

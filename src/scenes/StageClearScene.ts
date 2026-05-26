@@ -11,12 +11,13 @@ export class StageClearScene extends Phaser.Scene {
 
   create(data: { gameData: GameRegistryData }): void {
     const gd = data.gameData;
-    if (gd.score > gd.highScore) {
+    const newHigh = gd.score > gd.highScore;
+    if (newHigh) {
       gd.highScore = gd.score;
       saveHighScore(gd.score);
     }
 
-    this.cameras.main.setBackgroundColor(0x000000);
+    this.cameras.main.setBackgroundColor(0x0a0a0a);
     this.cameras.main.fadeIn(400);
 
     this.add.rectangle(0, 0, GAME_WIDTH, 24, COLORS.background, 0.85).setOrigin(0);
@@ -48,9 +49,17 @@ export class StageClearScene extends Phaser.Scene {
       this.tweens.add({ targets: hi, alpha: { from: 1, to: 0.3 }, duration: 400, yoyo: true, repeat: -1 });
     }
 
+    const next = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT - 18, `NEXT: STAGE ${gd.stage + 1}`, {
+      fontFamily: 'monospace',
+      fontSize: '7px',
+      color: '#666666',
+    }).setOrigin(0.5);
+
+    this.tweens.add({ targets: next, alpha: { from: 0.4, to: 1 }, duration: 600, yoyo: true, repeat: -1 });
+
     gd.stage++;
-    this.time.delayedCall(2400, () => {
-      this.cameras.main.fadeOut(250, 0, 0, 0, (_c: Phaser.Cameras.Scene2D.Camera, p: number) => {
+    this.time.delayedCall(2600, () => {
+      this.cameras.main.fadeOut(300, 0, 0, 0, (_c: Phaser.Cameras.Scene2D.Camera, p: number) => {
         if (p >= 1) this.scene.start('GameScene', { stage: gd.stage, gameData: gd });
       });
     });

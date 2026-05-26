@@ -9,7 +9,7 @@ export class BootScene extends Phaser.Scene {
   }
 
   create(): void {
-    this.cameras.main.setBackgroundColor(0x0a0a0a);
+    this.cameras.main.setBackgroundColor(COLORS.background);
     generateAllSprites(this);
 
     this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 22, 'BATTLE CITY', uiText('12px', colorHex(COLORS.uiAccent))).setOrigin(0.5);
