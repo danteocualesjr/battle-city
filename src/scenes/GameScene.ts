@@ -15,6 +15,7 @@ import { GameController } from '../game/GameController';
 import { LEVELS } from '../map/levels';
 import { TileMap } from '../map/TileMap';
 import { HUD } from '../ui/HUD';
+import { drawCornerFrame, TEXT_SHADOW } from '../ui/UiHelpers';
 import { generateAllSprites } from '../render/Sprites';
 import type { EnemyState } from '../entities/types';
 
@@ -73,7 +74,12 @@ export class GameScene extends Phaser.Scene {
     // Playfield frame: dark border + black inner area
     this.add.rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, COLORS.background).setOrigin(0).setDepth(0);
     this.add.rectangle(PLAYFIELD_OFFSET_X, PLAYFIELD_OFFSET_Y, PLAYFIELD_SIZE, PLAYFIELD_SIZE, COLORS.playfield).setOrigin(0).setDepth(0.5);
-    this.add.rectangle(PLAYFIELD_OFFSET_X + 1, PLAYFIELD_OFFSET_Y + 1, PLAYFIELD_SIZE - 2, PLAYFIELD_SIZE - 2, 0x1a1a1a, 0).setOrigin(0).setDepth(0.6).setStrokeStyle(1, 0x333333);
+    const pfFrame = this.add.graphics().setDepth(0.7);
+    pfFrame.lineStyle(2, COLORS.uiAccent, 0.35);
+    pfFrame.strokeRect(PLAYFIELD_OFFSET_X - 1, PLAYFIELD_OFFSET_Y - 1, PLAYFIELD_SIZE + 2, PLAYFIELD_SIZE + 2);
+    pfFrame.lineStyle(1, 0x444444, 1);
+    pfFrame.strokeRect(PLAYFIELD_OFFSET_X, PLAYFIELD_OFFSET_Y, PLAYFIELD_SIZE, PLAYFIELD_SIZE);
+    drawCornerFrame(pfFrame, PLAYFIELD_OFFSET_X, PLAYFIELD_OFFSET_Y, PLAYFIELD_SIZE, PLAYFIELD_SIZE, 0xffffff, 0.2, 8);
 
     // Playfield container (everything inside the play area)
     this.playfield = this.add.container(PLAYFIELD_OFFSET_X, PLAYFIELD_OFFSET_Y).setDepth(8);
@@ -112,26 +118,37 @@ export class GameScene extends Phaser.Scene {
 
   private buildStageIntro(): void {
     this.stageIntroOverlay = this.add.container(0, 0).setDepth(60);
-    const bg = this.add.rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, 0x7d7d7d).setOrigin(0);
-    const label = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 10, 'STAGE', {
+    const bg = this.add.rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, 0x6e6e6e).setOrigin(0);
+    const stripes = this.add.graphics();
+    for (let y = 0; y < GAME_HEIGHT; y += 4) {
+      stripes.fillStyle(0x000000, y % 8 === 0 ? 0.06 : 0);
+      stripes.fillRect(0, y, GAME_WIDTH, 4);
+    }
+    const label = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 14, 'STAGE', {
       fontFamily: 'monospace',
-      fontSize: '10px',
-      color: '#333333',
+      fontSize: '11px',
+      color: '#2a2a2a',
+    }).setOrigin(0.5);
+    const numShadow = this.add.text(GAME_WIDTH / 2 + 2, GAME_HEIGHT / 2 + 10, String(this.gameData.stage), {
+      fontFamily: 'monospace',
+      fontSize: '28px',
+      color: '#1a1a1a',
+      fontStyle: 'bold',
     }).setOrigin(0.5);
     const num = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 + 8, String(this.gameData.stage), {
       fontFamily: 'monospace',
-      fontSize: '22px',
+      fontSize: '28px',
       color: '#000000',
       fontStyle: 'bold',
     }).setOrigin(0.5);
-    const txt = this.add.container(0, 0, [label, num]);
+    const txt = this.add.container(0, 0, [stripes, label, numShadow, num]);
     this.stageIntroOverlay.add([bg, txt]);
-    this.tweens.add({ targets: num, scale: { from: 1.2, to: 1 }, duration: 400, ease: 'Back.easeOut' });
+    this.tweens.add({ targets: [num, numShadow], scale: { from: 1.35, to: 1 }, duration: 450, ease: 'Back.easeOut' });
     this.tweens.add({
       targets: this.stageIntroOverlay,
       alpha: 0,
-      delay: 1500,
-      duration: 350,
+      delay: 1600,
+      duration: 400,
       onComplete: () => this.stageIntroOverlay.setVisible(false),
     });
   }
@@ -139,21 +156,24 @@ export class GameScene extends Phaser.Scene {
   private buildPauseOverlay(): void {
     this.pauseOverlay = this.add.container(0, 0).setDepth(50).setVisible(false);
     const bg = this.add.rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, COLORS.pauseOverlay, COLORS.pauseDim).setOrigin(0);
-    const txt = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 14, 'PAUSE', {
-      fontFamily: 'monospace',
-      fontSize: '20px',
-      color: '#e85020',
-    }).setOrigin(0.5);
-    const hint = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 + 14, 'ESC resume · R restart · Q quit', {
-      fontFamily: 'monospace',
-      fontSize: '8px',
-      color: '#ffffff',
-    }).setOrigin(0.5);
+    const panel = this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, 156, 88, 0x141414, 0.92).setOrigin(0.5);
     const frame = this.add.graphics();
-    frame.lineStyle(2, COLORS.uiAccent, 0.8);
-    frame.strokeRect(GAME_WIDTH / 2 - 70, GAME_HEIGHT / 2 - 36, 140, 72);
-    this.pauseOverlay.add([bg, frame, txt, hint]);
+    drawCornerFrame(frame, GAME_WIDTH / 2 - 78, GAME_HEIGHT / 2 - 44, 156, 88, COLORS.uiAccent, 0.9, 12);
+    const icon = this.add.image(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 22, 'tank-p1-up').setScale(1.2);
+    const txt = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 + 2, 'PAUSE', {
+      fontFamily: 'monospace',
+      fontSize: '18px',
+      color: '#e85020',
+      shadow: TEXT_SHADOW,
+    }).setOrigin(0.5);
+    const hint = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 + 22, 'ESC · R · Q', {
+      fontFamily: 'monospace',
+      fontSize: '7px',
+      color: '#aaaaaa',
+    }).setOrigin(0.5);
+    this.pauseOverlay.add([bg, panel, frame, icon, txt, hint]);
     this.tweens.add({ targets: txt, alpha: { from: 1, to: 0.45 }, duration: 600, yoyo: true, repeat: -1 });
+    this.tweens.add({ targets: icon, y: '-=2', duration: 500, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
   }
 
   update(_time: number, delta: number): void {
@@ -306,7 +326,6 @@ export class GameScene extends Phaser.Scene {
       const tex = b.direction === 'up' || b.direction === 'down' ? 'bullet-up' : 'bullet-h';
       s.setTexture(tex);
       s.setRotation(b.direction === 'down' ? Math.PI : b.direction === 'left' ? Math.PI : 0);
-      // For h direction we keep texture as is (it's symmetric)
       s.setPosition(b.x, b.y);
       s.setVisible(true);
       bi++;
