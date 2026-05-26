@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { COLORS, GAME_HEIGHT, GAME_WIDTH } from '../config/constants';
+import { COLORS, GAME_HEIGHT, GAME_WIDTH, UI_FONT } from '../config/constants';
 import type { GameRegistryData } from '../config/GameRegistry';
 import { saveHighScore } from '../config/GameRegistry';
 
@@ -23,7 +23,7 @@ export class GameOverScene extends Phaser.Scene {
     this.add.rectangle(0, GAME_HEIGHT - 28, GAME_WIDTH, 28, COLORS.background, 0.9).setOrigin(0);
 
     this.add.text(GAME_WIDTH / 2 + 2, GAME_HEIGHT + 42, 'GAME\nOVER', {
-      fontFamily: 'monospace',
+      fontFamily: UI_FONT,
       fontSize: '28px',
       color: '#000000',
       align: 'center',
@@ -32,7 +32,7 @@ export class GameOverScene extends Phaser.Scene {
 
     // GAME OVER rises into view (classic feel)
     const title = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT + 40, 'GAME\nOVER', {
-      fontFamily: 'monospace',
+      fontFamily: UI_FONT,
       fontSize: '28px',
       color: '#d63020',
       align: 'center',
@@ -48,7 +48,7 @@ export class GameOverScene extends Phaser.Scene {
 
     if (data.baseDestroyed) {
       this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 + 22, 'BASE DESTROYED', {
-        fontFamily: 'monospace',
+        fontFamily: UI_FONT,
         fontSize: '9px',
         color: '#888888',
       }).setOrigin(0.5);
@@ -56,25 +56,25 @@ export class GameOverScene extends Phaser.Scene {
 
     const rank = gd.score >= 100000 ? 'ACE' : gd.score >= 50000 ? 'VETERAN' : gd.score >= 20000 ? 'SOLDIER' : 'RECRUIT';
     this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 + 28, rank, {
-      fontFamily: 'monospace',
+      fontFamily: UI_FONT,
       fontSize: '8px',
       color: '#eeb850',
     }).setOrigin(0.5);
 
     this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 + 40, `SCORE  ${String(gd.score).padStart(6, '0')}`, {
-      fontFamily: 'monospace',
+      fontFamily: UI_FONT,
       fontSize: '10px',
       color: '#ffffff',
     }).setOrigin(0.5);
 
     this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 + 54, `HI     ${String(gd.highScore).padStart(6, '0')}`, {
-      fontFamily: 'monospace',
+      fontFamily: UI_FONT,
       fontSize: '10px',
       color: newHigh ? '#eeb850' : '#888888',
     }).setOrigin(0.5);
 
     const hint = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT - 24, 'PRESS ENTER', {
-      fontFamily: 'monospace',
+      fontFamily: UI_FONT,
       fontSize: '10px',
       color: '#eeb850',
       backgroundColor: '#1a1a1a',

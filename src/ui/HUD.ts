@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import {
   COLORS,
   ENEMIES_PER_STAGE,
+  UI_FONT,
   PLAYFIELD_OFFSET_X,
   PLAYFIELD_OFFSET_Y,
   PLAYFIELD_SIZE,
@@ -42,7 +43,7 @@ export class HUD {
     // High score (top)
     this.highScoreText = scene.add
       .text(PLAYFIELD_OFFSET_X, PLAYFIELD_OFFSET_Y - 6, 'HI 20000', {
-        fontFamily: 'monospace',
+        fontFamily: UI_FONT,
         fontSize: '7px',
         color: '#ffffff',
         shadow: { offsetX: 1, offsetY: 1, color: '#000000', blur: 0, fill: true },
@@ -52,7 +53,7 @@ export class HUD {
 
     this.scoreText = scene.add
       .text(PLAYFIELD_OFFSET_X + PLAYFIELD_SIZE, PLAYFIELD_OFFSET_Y - 6, 'IP 000000', {
-        fontFamily: 'monospace',
+        fontFamily: UI_FONT,
         fontSize: '7px',
         color: '#ffffff',
         shadow: { offsetX: 1, offsetY: 1, color: '#000000', blur: 0, fill: true },
@@ -62,7 +63,7 @@ export class HUD {
 
     scene.add
       .text(sx + 6, PLAYFIELD_OFFSET_Y + 4, 'REST', {
-        fontFamily: 'monospace',
+        fontFamily: UI_FONT,
         fontSize: '6px',
         color: '#cccccc',
       })
@@ -91,7 +92,7 @@ export class HUD {
     const livesY = iconStartY + 10 * 10 + 8;
     scene.add
       .text(sx + 6, livesY, 'IP', {
-        fontFamily: 'monospace',
+        fontFamily: UI_FONT,
         fontSize: '8px',
         color: '#ffffff',
       })
@@ -99,7 +100,7 @@ export class HUD {
     scene.add.image(sx + 6, livesY + 12, 'life-icon').setOrigin(0).setDepth(23);
     this.livesValue = scene.add
       .text(sx + 22, livesY + 13, '3', {
-        fontFamily: 'monospace',
+        fontFamily: UI_FONT,
         fontSize: '10px',
         color: '#ffffff',
       })
@@ -111,7 +112,7 @@ export class HUD {
     this.drawFlag(sx + 6, flagY);
     this.stageText = scene.add
       .text(sx + 22, flagY + 8, '1', {
-        fontFamily: 'monospace',
+        fontFamily: UI_FONT,
         fontSize: '12px',
         color: '#ffffff',
       })
@@ -120,7 +121,7 @@ export class HUD {
     // Star tier
     this.starText = scene.add
       .text(sx + 6, flagY + 26, '★0', {
-        fontFamily: 'monospace',
+        fontFamily: UI_FONT,
         fontSize: '9px',
         color: '#ffd040',
         shadow: { offsetX: 0, offsetY: 0, color: '#806000', blur: 2, fill: true },

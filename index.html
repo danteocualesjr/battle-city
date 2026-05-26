@@ -6,12 +6,19 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0a0a0a" />
+    <meta name="description" content="Classic Battle City tank action in your browser" />
     <title>Battle City</title>
     <style>
       * { margin: 0; padding: 0; box-sizing: border-box; }
+      @keyframes ambient-shift {
+        from { background: radial-gradient(ellipse at center, #1a1a1a 0%, #050505 70%); }
+        to { background: radial-gradient(ellipse at center, #1f1810 0%, #050505 70%); }
+      }
       html, body {
         width: 100%; height: 100%;
         background: radial-gradient(ellipse at center, #1a1a1a 0%, #050505 70%);
+        animation: ambient-shift 12s ease-in-out infinite alternate;
         overflow: hidden;
         font-family: 'Press Start 2P', monospace;
       }
