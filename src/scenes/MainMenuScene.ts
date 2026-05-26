@@ -184,7 +184,10 @@ export class MainMenuScene extends Phaser.Scene {
   private moveCursor(dir: number): void {
     this.selected = Phaser.Math.Wrap(this.selected + dir, 0, this.options.length);
     this.cursor.y = 150 + this.selected * 18;
-    this.labels.forEach((l, i) => l.setColor(i === this.selected ? '#eeb850' : '#ffffff'));
+    this.labels.forEach((l, i) => {
+      l.setColor(i === this.selected ? '#eeb850' : '#ffffff');
+      l.setScale(i === this.selected ? 1.05 : 1);
+    });
   }
 
   private confirm(): void {
