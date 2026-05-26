@@ -2,64 +2,17 @@ import Phaser from 'phaser';
 import { COLORS, GAME_HEIGHT, GAME_WIDTH } from '../config/constants';
 import { createDefaultRegistry, loadHighScore } from '../config/GameRegistry';
 import { generateAllSprites } from '../render/Sprites';
+import { addStarfield, drawCornerFrame, TEXT_SHADOW } from '../ui/UiHelpers';
 
 const TITLE_LETTERS: Record<string, string[]> = {
-  B: [
-    '#####.',
-    '#....#',
-    '#####.',
-    '#....#',
-    '#####.',
-  ],
-  A: [
-    '.###..',
-    '#...#.',
-    '#####.',
-    '#...#.',
-    '#...#.',
-  ],
-  T: [
-    '#####.',
-    '..#...',
-    '..#...',
-    '..#...',
-    '..#...',
-  ],
-  L: [
-    '#.....',
-    '#.....',
-    '#.....',
-    '#.....',
-    '#####.',
-  ],
-  E: [
-    '#####.',
-    '#.....',
-    '###...',
-    '#.....',
-    '#####.',
-  ],
-  C: [
-    '.####.',
-    '#.....',
-    '#.....',
-    '#.....',
-    '.####.',
-  ],
-  I: [
-    '#####.',
-    '..#...',
-    '..#...',
-    '..#...',
-    '#####.',
-  ],
-  Y: [
-    '#...#.',
-    '.#.#..',
-    '..#...',
-    '..#...',
-    '..#...',
-  ],
+  B: ['#####.', '#....#', '#####.', '#....#', '#####.'],
+  A: ['.###..', '#...#.', '#####.', '#...#.', '#...#.'],
+  T: ['#####.', '..#...', '..#...', '..#...', '..#...'],
+  L: ['#.....', '#.....', '#.....', '#.....', '#####.'],
+  E: ['#####.', '#.....', '###...', '#.....', '#####.'],
+  C: ['.####.', '#.....', '#.....', '#.....', '.####.'],
+  I: ['#####.', '..#...', '..#...', '..#...', '#####.'],
+  Y: ['#...#.', '.#.#..', '..#...', '..#...', '..#...'],
 };
 
 export class MainMenuScene extends Phaser.Scene {
@@ -75,60 +28,66 @@ export class MainMenuScene extends Phaser.Scene {
   create(): void {
     this.cameras.main.setBackgroundColor(COLORS.background);
     generateAllSprites(this);
+    addStarfield(this);
 
     const data = createDefaultRegistry();
     data.highScore = loadHighScore();
 
-    // Top scores bar
-    this.add.text(20, 12, 'I-      00', {
+    this.add.text(20, 12, '1P  000000', {
       fontFamily: 'monospace',
-      fontSize: '10px',
-      color: '#ffffff',
+      fontSize: '9px',
+      color: '#cccccc',
+      shadow: TEXT_SHADOW,
     });
-    this.add.text(GAME_WIDTH - 20, 12, `HI- ${String(data.highScore).padStart(6, '0')}`, {
+    this.add.text(GAME_WIDTH - 20, 12, `HI  ${String(data.highScore).padStart(6, '0')}`, {
       fontFamily: 'monospace',
-      fontSize: '10px',
-      color: '#ffffff',
+      fontSize: '9px',
+      color: '#eeb850',
+      shadow: TEXT_SHADOW,
     }).setOrigin(1, 0);
 
     const frame = this.add.graphics();
-    frame.lineStyle(2, COLORS.uiAccent, 0.5);
+    frame.lineStyle(1, 0xffffff, 0.12);
     frame.strokeRect(12, 32, GAME_WIDTH - 24, GAME_HEIGHT - 64);
-    frame.lineStyle(1, 0xffffff, 0.15);
-    frame.strokeRect(14, 34, GAME_WIDTH - 28, GAME_HEIGHT - 68);
+    drawCornerFrame(frame, 12, 32, GAME_WIDTH - 24, GAME_HEIGHT - 64, COLORS.uiAccent, 0.55, 14);
 
-    this.add.text(GAME_WIDTH - 14, 22, 'v1.0', {
+    this.add.text(GAME_WIDTH - 14, 22, 'v1.1', {
       fontFamily: 'monospace',
       fontSize: '6px',
-      color: '#666666',
+      color: '#555555',
     }).setOrigin(1, 0);
 
     this.drawTitle();
+    this.addDecorTanks();
 
-    const startY = 150;
+    const startY = 152;
     this.options.forEach((opt, i) => {
-      const t = this.add.text(GAME_WIDTH / 2 + 6, startY + i * 18, opt, {
+      const t = this.add.text(GAME_WIDTH / 2, startY + i * 20, opt, {
         fontFamily: 'monospace',
         fontSize: '11px',
-        color: '#ffffff',
-      }).setOrigin(0, 0.5);
+        color: '#888888',
+        shadow: TEXT_SHADOW,
+      }).setOrigin(0.5, 0.5);
       this.labels.push(t);
     });
 
-    this.cursor = this.add.image(GAME_WIDTH / 2 - 40, startY, 'tank-p1-right').setOrigin(0, 0.5);
-    this.tweens.add({ targets: this.cursor, x: '+=3', duration: 350, yoyo: true, repeat: -1 });
+    this.cursor = this.add.image(GAME_WIDTH / 2 - 72, startY, 'tank-p1-right').setOrigin(0, 0.5);
+    this.tweens.add({ targets: this.cursor, x: '+=4', duration: 320, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
 
-    this.add.text(GAME_WIDTH / 2, GAME_HEIGHT - 28, '↑ ↓  SELECT     ENTER  CONFIRM', {
+    this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT - 30, 200, 14, 0x000000, 0.35).setOrigin(0.5);
+    this.add.text(GAME_WIDTH / 2, GAME_HEIGHT - 30, '↑↓ SELECT   ENTER START', {
       fontFamily: 'monospace',
       fontSize: '7px',
-      color: '#999999',
+      color: '#bbbbbb',
     }).setOrigin(0.5);
 
-    this.add.text(GAME_WIDTH / 2, GAME_HEIGHT - 14, 'fan tribute · NAMCO 1985', {
+    this.add.text(GAME_WIDTH / 2, GAME_HEIGHT - 12, 'fan tribute · NAMCO 1985', {
       fontFamily: 'monospace',
-      fontSize: '7px',
-      color: '#777777',
+      fontSize: '6px',
+      color: '#555555',
     }).setOrigin(0.5);
+
+    this.refreshMenuLabels();
 
     this.input.keyboard?.on('keydown-UP', () => this.moveCursor(-1));
     this.input.keyboard?.on('keydown-DOWN', () => this.moveCursor(1));
@@ -138,6 +97,12 @@ export class MainMenuScene extends Phaser.Scene {
     this.input.keyboard?.on('keydown-SPACE', () => this.confirm());
 
     this.cameras.main.fadeIn(450);
+  }
+
+  private addDecorTanks(): void {
+    const left = this.add.image(36, 118, 'tank-e-basic-right').setAlpha(0.35).setFlipX(true);
+    const right = this.add.image(GAME_WIDTH - 36, 118, 'tank-p2-left').setAlpha(0.35);
+    this.tweens.add({ targets: [left, right], y: '+=2', duration: 900, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
   }
 
   private drawTitle(): void {
@@ -175,7 +140,6 @@ export class MainMenuScene extends Phaser.Scene {
       const row = pattern[r]!;
       for (let c = 0; c < row.length; c++) {
         if (row[c] === '#') {
-          // brick fill with highlight
           g.fillStyle(COLORS.titleBrickLight, 1);
           g.fillRect(x + c * cs, y + r * cs, cs, cs);
           g.fillStyle(COLORS.titleBrick, 1);
@@ -189,10 +153,16 @@ export class MainMenuScene extends Phaser.Scene {
 
   private moveCursor(dir: number): void {
     this.selected = Phaser.Math.Wrap(this.selected + dir, 0, this.options.length);
-    this.cursor.y = 150 + this.selected * 18;
+    this.cursor.y = 152 + this.selected * 20;
+    this.refreshMenuLabels();
+  }
+
+  private refreshMenuLabels(): void {
     this.labels.forEach((l, i) => {
-      l.setColor(i === this.selected ? '#eeb850' : '#ffffff');
-      l.setScale(i === this.selected ? 1.05 : 1);
+      const on = i === this.selected;
+      l.setColor(on ? '#eeb850' : '#888888');
+      l.setScale(on ? 1.08 : 1);
+      l.setText(on ? `▶ ${this.options[i]} ◀` : this.options[i]!);
     });
   }
 
@@ -215,6 +185,7 @@ export class MainMenuScene extends Phaser.Scene {
       fontFamily: 'monospace',
       fontSize: '8px',
       color: '#eeb850',
+      shadow: TEXT_SHADOW,
     }).setOrigin(0.5);
     this.time.delayedCall(1500, () => t.destroy());
   }

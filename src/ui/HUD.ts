@@ -7,6 +7,7 @@ import {
   PLAYFIELD_SIZE,
   SIDEBAR_WIDTH,
 } from '../config/constants';
+import { drawCornerFrame, TEXT_SHADOW } from './UiHelpers';
 
 export class HUD {
   private enemyIcons: Phaser.GameObjects.Image[] = [];
@@ -19,6 +20,7 @@ export class HUD {
   private bgInner!: Phaser.GameObjects.Rectangle;
   private flagBody!: Phaser.GameObjects.Graphics;
   private sidebarBorder!: Phaser.GameObjects.Graphics;
+  private cornerFrame!: Phaser.GameObjects.Graphics;
 
   constructor(scene: Phaser.Scene) {
     const sx = PLAYFIELD_OFFSET_X + PLAYFIELD_SIZE + 8;
@@ -34,43 +36,48 @@ export class HUD {
       .setDepth(21);
 
     this.sidebarBorder = scene.add.graphics().setDepth(22);
-    this.sidebarBorder.lineStyle(1, 0xffffff, 0.35);
+    this.sidebarBorder.lineStyle(1, 0xffffff, 0.4);
     this.sidebarBorder.strokeRect(sx, PLAYFIELD_OFFSET_Y, SIDEBAR_WIDTH - 8, PLAYFIELD_SIZE);
-    this.sidebarBorder.lineStyle(1, 0x3a3a3a, 1);
+    this.sidebarBorder.lineStyle(1, 0x2a2a2a, 1);
     this.sidebarBorder.strokeRect(sx + 1, PLAYFIELD_OFFSET_Y + 1, SIDEBAR_WIDTH - 10, PLAYFIELD_SIZE - 2);
 
-    // High score (top)
+    this.cornerFrame = scene.add.graphics().setDepth(22);
+    drawCornerFrame(this.cornerFrame, sx + 2, PLAYFIELD_OFFSET_Y + 2, SIDEBAR_WIDTH - 12, PLAYFIELD_SIZE - 4, 0xffffff, 0.25, 6);
+
+    // High score (top bar above playfield)
     this.highScoreText = scene.add
       .text(PLAYFIELD_OFFSET_X, PLAYFIELD_OFFSET_Y - 6, 'HI 20000', {
         fontFamily: 'monospace',
         fontSize: '7px',
-        color: '#ffffff',
-        shadow: { offsetX: 1, offsetY: 1, color: '#000000', blur: 0, fill: true },
+        color: '#eeb850',
+        shadow: TEXT_SHADOW,
       })
       .setOrigin(0, 1)
       .setDepth(23);
 
     this.scoreText = scene.add
-      .text(PLAYFIELD_OFFSET_X + PLAYFIELD_SIZE, PLAYFIELD_OFFSET_Y - 6, 'IP 000000', {
+      .text(PLAYFIELD_OFFSET_X + PLAYFIELD_SIZE, PLAYFIELD_OFFSET_Y - 6, '1P 000000', {
         fontFamily: 'monospace',
         fontSize: '7px',
         color: '#ffffff',
-        shadow: { offsetX: 1, offsetY: 1, color: '#000000', blur: 0, fill: true },
+        shadow: TEXT_SHADOW,
       })
       .setOrigin(1, 1)
       .setDepth(23);
 
     scene.add
-      .text(sx + 6, PLAYFIELD_OFFSET_Y + 4, 'REST', {
+      .text(sx + (SIDEBAR_WIDTH - 8) / 2, PLAYFIELD_OFFSET_Y + 4, 'ENEMY', {
         fontFamily: 'monospace',
         fontSize: '6px',
-        color: '#cccccc',
+        color: '#e0e0e0',
+        shadow: TEXT_SHADOW,
       })
+      .setOrigin(0.5, 0)
       .setDepth(23);
 
     // Enemy reserve grid: 2 columns × 10 rows of mini tank icons
     const iconStartX = sx + 8;
-    const iconStartY = PLAYFIELD_OFFSET_Y + 12;
+    const iconStartY = PLAYFIELD_OFFSET_Y + 14;
     for (let i = 0; i < ENEMIES_PER_STAGE; i++) {
       const col = i % 2;
       const row = Math.floor(i / 2);
@@ -83,43 +90,57 @@ export class HUD {
 
     const dividerY = iconStartY + 10 * 10 + 4;
     scene.add
-      .rectangle(sx + 4, dividerY, SIDEBAR_WIDTH - 16, 1, 0x5a5a5a)
+      .rectangle(sx + 4, dividerY, SIDEBAR_WIDTH - 16, 1, 0x707070)
+      .setOrigin(0)
+      .setDepth(22);
+    scene.add
+      .rectangle(sx + 4, dividerY + 1, SIDEBAR_WIDTH - 16, 1, 0x3a3a3a)
       .setOrigin(0)
       .setDepth(22);
 
     // Lives label
-    const livesY = iconStartY + 10 * 10 + 8;
+    const livesY = iconStartY + 10 * 10 + 10;
     scene.add
-      .text(sx + 6, livesY, 'IP', {
+      .text(sx + 6, livesY, '1P', {
         fontFamily: 'monospace',
-        fontSize: '8px',
-        color: '#ffffff',
+        fontSize: '7px',
+        color: '#e0e0e0',
+        shadow: TEXT_SHADOW,
       })
       .setDepth(23);
-    scene.add.image(sx + 6, livesY + 12, 'life-icon').setOrigin(0).setDepth(23);
+    scene.add.image(sx + 6, livesY + 11, 'life-icon').setOrigin(0).setDepth(23);
     this.livesValue = scene.add
-      .text(sx + 22, livesY + 13, '3', {
+      .text(sx + 22, livesY + 12, '3', {
         fontFamily: 'monospace',
-        fontSize: '10px',
+        fontSize: '11px',
         color: '#ffffff',
+        shadow: TEXT_SHADOW,
       })
       .setDepth(23);
 
     // Stage flag
-    const flagY = livesY + 30;
-    this.flagBody = scene.add.graphics().setDepth(23);
-    this.drawFlag(sx + 6, flagY);
-    this.stageText = scene.add
-      .text(sx + 22, flagY + 8, '1', {
+    const flagY = livesY + 32;
+    scene.add
+      .text(sx + 6, flagY - 2, 'STAGE', {
         fontFamily: 'monospace',
-        fontSize: '12px',
+        fontSize: '6px',
+        color: '#cccccc',
+      })
+      .setDepth(23);
+    this.flagBody = scene.add.graphics().setDepth(23);
+    this.drawFlag(sx + 6, flagY + 6);
+    this.stageText = scene.add
+      .text(sx + 22, flagY + 14, '1', {
+        fontFamily: 'monospace',
+        fontSize: '13px',
         color: '#ffffff',
+        shadow: TEXT_SHADOW,
       })
       .setDepth(23);
 
     // Star tier
     this.starText = scene.add
-      .text(sx + 6, flagY + 26, '★0', {
+      .text(sx + 6, flagY + 30, '★0', {
         fontFamily: 'monospace',
         fontSize: '9px',
         color: '#ffd040',
@@ -132,10 +153,8 @@ export class HUD {
     const g = this.flagBody;
     g.fillStyle(0x4a4a4a, 1);
     g.fillRect(x, y + 14, 6, 2);
-    // pole
     g.fillStyle(0xffffff, 1);
     g.fillRect(x + 2, y, 1, 16);
-    // flag (red triangle pennant)
     g.fillStyle(COLORS.hudFlag, 1);
     g.fillTriangle(x + 3, y + 1, x + 14, y + 4, x + 3, y + 8);
   }
@@ -144,12 +163,13 @@ export class HUD {
     const defeated = ENEMIES_PER_STAGE - enemiesRemaining;
     this.enemyIcons.forEach((icon, i) => {
       icon.setVisible(i >= defeated);
+      icon.setAlpha(i >= defeated ? 1 : 0.35);
     });
     this.livesValue.setText(String(lives));
     this.stageText.setText(String(stage));
-    this.scoreText.setText(`IP ${String(score).padStart(6, '0')}`);
+    this.scoreText.setText(`1P ${String(score).padStart(6, '0')}`);
     this.highScoreText.setText(`HI ${String(highScore).padStart(5, '0')}`);
-    this.highScoreText.setColor(score >= highScore && score > 0 ? '#eeb850' : '#ffffff');
+    this.highScoreText.setColor(score >= highScore && score > 0 ? '#ffec80' : '#eeb850');
     this.starText.setText(`★${starLevel}`);
     this.starText.setColor(starLevel > 0 ? '#ffec80' : '#ffd040');
   }
@@ -158,6 +178,7 @@ export class HUD {
     this.bg.destroy();
     this.bgInner.destroy();
     this.sidebarBorder.destroy();
+    this.cornerFrame.destroy();
     this.flagBody.destroy();
     this.enemyIcons.forEach((i) => i.destroy());
     this.livesValue.destroy();
