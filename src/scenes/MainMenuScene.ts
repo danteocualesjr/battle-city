@@ -85,7 +85,7 @@ export class MainMenuScene extends Phaser.Scene {
       fontSize: '10px',
       color: '#ffffff',
     });
-    this.add.text(GAME_WIDTH - 20, 12, `HI- ${data.highScore}`, {
+    this.add.text(GAME_WIDTH - 20, 12, `HI- ${String(data.highScore).padStart(6, '0')}`, {
       fontFamily: 'monospace',
       fontSize: '10px',
       color: '#ffffff',
